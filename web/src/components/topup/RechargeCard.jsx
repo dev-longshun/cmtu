@@ -281,36 +281,27 @@ const RechargeCard = ({
                           }
                         }}
                       />
+                      <Skeleton
+                        loading={showAmountSkeleton}
+                        active
+                        placeholder={
+                          <Skeleton.Title
+                            style={{
+                              width: 120,
+                              height: 20,
+                              borderRadius: 6,
+                            }}
+                          />
+                        }
+                      >
+                        <Text type='secondary' className='text-red-600' size='small'>
+                          {t('实付金额：')}
+                          <span style={{ color: 'red' }}>
+                            {renderAmount()}
+                          </span>
+                        </Text>
+                      </Skeleton>
                     </div>
-                  </Col>
-                      formatter={(value) => (value ? `${value}` : '')}
-                      parser={(value) =>
-                        value ? parseInt(value.replace(/[^\d]/g, '')) : 0
-                      }
-                      extraText={
-                        <Skeleton
-                          loading={showAmountSkeleton}
-                          active
-                          placeholder={
-                            <Skeleton.Title
-                              style={{
-                                width: 120,
-                                height: 20,
-                                borderRadius: 6,
-                              }}
-                            />
-                          }
-                        >
-                          <Text type='secondary' className='text-red-600'>
-                            {t('实付金额：')}
-                            <span style={{ color: 'red' }}>
-                              {renderAmount()}
-                            </span>
-                          </Text>
-                        </Skeleton>
-                      }
-                      style={{ width: '100%' }}
-                    />
                   </Col>
                   <Col xs={24} sm={24} md={24} lg={14} xl={14}>
                     <Form.Slot label={t('选择支付方式')}>
