@@ -134,6 +134,7 @@ const SystemSetting = () => {
   // SMTP 多账号状态
   const [smtpAccounts, setSmtpAccounts] = useState([]);
   const [smtpModalVisible, setSmtpModalVisible] = useState(false);
+  const [smtpEditIndex, setSmtpEditIndex] = useState(-1); // -1 = 新增模式
   const [smtpForm, setSmtpForm] = useState({
     server: '',
     port: 465,
@@ -352,11 +353,31 @@ const SystemSetting = () => {
   };
 
   const handleAddSmtpAccount = () => {
-    if (!smtpForm.server || !smtpForm.account || !smtpForm.token) {
+    if (!smtpForm.server || !smtpForm.account) {
       showError(t('请填写服务器地址、账户和授权码'));
       return;
     }
-    setSmtpAccounts([...smtpAccounts, { ...smtpForm }]);
+    // 新增时必须填 token，编辑时可留空表示不修改
+    if (smtpEditIndex === -1 && !smtpForm.token) {
+      showError(t('请填写服务器地址、账户和授权码'));
+      return;
+    }
+    if (smtpEditIndex >= 0) {
+      // 编辑模式
+      const updated = [...smtpAccounts];
+      updated[smtpEditIndex] = {
+        ...smtpForm,
+        // 如果 token 为空，保留原值
+        token: smtpForm.token || smtpAccounts[smtpEditIndex].token,
+      };
+      setSmtpAccounts(updated);
+    } else {
+      setSmtpAccounts([...smtpAccounts, { ...smtpForm }]);
+    }
+    resetSmtpForm();
+  };
+
+  const resetSmtpForm = () => {
     setSmtpForm({
       server: '',
       port: 465,
@@ -365,7 +386,15 @@ const SystemSetting = () => {
       token: '',
       ssl_enabled: true,
     });
+    setSmtpEditIndex(-1);
     setSmtpModalVisible(false);
+  };
+
+  const handleEditSmtpAccount = (index) => {
+    const acct = smtpAccounts[index];
+    setSmtpForm({ ...acct, token: '' }); // token 脱敏，留空表示不修改
+    setSmtpEditIndex(index);
+    setSmtpModalVisible(true);
   };
 
   const handleDeleteSmtpAccount = (index) => {
@@ -1380,9 +1409,15 @@ const SystemSetting = () => {
                       {
                         title: t('操作'),
                         key: 'action',
-                        width: 140,
+                        width: 200,
                         render: (_, record, index) => (
                           <div style={{ display: 'flex', gap: 4 }}>
+                            <Button
+                              size='small'
+                              onClick={() => handleEditSmtpAccount(index)}
+                            >
+                              {t('编辑')}
+                            </Button>
                             <Button
                               size='small'
                               loading={smtpTestLoading[index]}
@@ -1419,7 +1454,18 @@ const SystemSetting = () => {
                   </Row>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <Button
-                      onClick={() => setSmtpModalVisible(true)}
+                      onClick={() => {
+                        setSmtpEditIndex(-1);
+                        setSmtpForm({
+                          server: '',
+                          port: 465,
+                          account: '',
+                          from: '',
+                          token: '',
+                          ssl_enabled: true,
+                        });
+                        setSmtpModalVisible(true);
+                      }}
                     >
                       {t('添加 SMTP 账号')}
                     </Button>
@@ -1431,11 +1477,11 @@ const SystemSetting = () => {
                     </Button>
                   </div>
                   <Modal
-                    title={t('添加 SMTP 账号')}
+                    title={smtpEditIndex >= 0 ? t('编辑 SMTP 账号') : t('添加 SMTP 账号')}
                     visible={smtpModalVisible}
                     onOk={handleAddSmtpAccount}
-                    onCancel={() => setSmtpModalVisible(false)}
-                    okText={t('添加')}
+                    onCancel={resetSmtpForm}
+                    okText={smtpEditIndex >= 0 ? t('保存') : t('添加')}
                     cancelText={t('取消')}
                   >
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -1478,7 +1524,7 @@ const SystemSetting = () => {
                         <Input
                           value={smtpForm.token}
                           type='password'
-                          placeholder={t('授权码')}
+                          placeholder={smtpEditIndex >= 0 ? t('留空则不修改') : t('授权码')}
                           onChange={(v) => setSmtpForm({ ...smtpForm, token: v })}
                         />
                       </div>

@@ -420,10 +420,14 @@ func TestSMTPAccount(c *gin.Context) {
 		})
 		return
 	}
+	logoURL := system_setting.ServerAddress + "/cmtu.png"
+	bodyHTML := "<p style='text-align:center;font-size:18px;font-weight:bold;color:#333;'>SMTP 测试成功 ✅</p>" +
+		"<p>此邮件由 <strong>" + req.Account.Account + "</strong> 发送，用于验证 SMTP 配置是否正常。</p>"
+	emailContent := common.BuildEmailHTML(logoURL, bodyHTML)
 	err := common.SendEmailWithAccount(
 		"SMTP 测试邮件",
 		req.To,
-		"<h3>SMTP 测试成功</h3><p>此邮件由 "+req.Account.Account+" 发送，用于验证 SMTP 配置是否正常。</p>",
+		emailContent,
 		&req.Account,
 	)
 	if err != nil {

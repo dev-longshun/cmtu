@@ -724,6 +724,8 @@
     "请填写服务器地址、账户和授权码": "Please fill in server address, account and authorization code",
     "测试收件邮箱": "Test recipient email",
     "请先填写测试收件邮箱": "Please enter a test recipient email first",
+    "编辑 SMTP 账号": "Edit SMTP Account",
+    "留空则不修改": "Leave empty to keep unchanged",
     "保存 Telegram 登录设置": "Save Telegram Login Settings",
     "保存 Turnstile 设置": "Save Turnstile Settings",
     "保存 WeChat Server 设置": "Save WeChat Server Settings",
