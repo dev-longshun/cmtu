@@ -52,7 +52,7 @@ const PricingSection = () => {
             </span>
           </div>
           <p className='text-sm mb-6' style={{ color: 'var(--ld-text-muted)' }}>
-            按量付费 · 用多少付多少 · 余额永不过期
+          按量付费 · 用多少付多少 · 余额永不过期
           </p>
           <div
             className='flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs mb-8'

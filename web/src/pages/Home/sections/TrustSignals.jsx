@@ -24,7 +24,7 @@ const TrustSignals = () => {
           className='text-sm mb-8'
           style={{ color: 'var(--ld-text-muted)' }}
         >
-          3 分钟接入全球主流 AI 模型，开始高效编程
+          3 分钟接入全球主流 AI 模型，开启你的编程之旅
         </p>
         <button
           className='ld-btn ld-btn--primary'

@@ -4,12 +4,12 @@ import { ArrowRight } from 'lucide-react';
 
 const TERMINAL_LINES = [
   { type: 'dim', text: '# Configure your AI coding tool' },
-  { type: 'cmd', text: '$ export BASE_URL=https://rabbitcodecc.com/v1' },
+  { type: 'cmd', text: '$ export BASE_URL=https://api.cmtu.cc/v1' },
   { type: 'cmd', text: '$ export API_KEY="sk-****************"' },
   { type: 'empty' },
   { type: 'dim', text: '# Start coding' },
   { type: 'cmd', text: '$ claude' },
-  { type: 'ok', text: '✓ Connected to RabbitCode API' },
+  { type: 'ok', text: '✓ Connected to 草莓兔 API' },
 ];
 
 const MODELS = [
@@ -37,27 +37,27 @@ const HeroSection = () => {
             className='text-xs tracking-widest uppercase mb-6'
             style={{ color: 'var(--ld-text-muted)', letterSpacing: '0.2em' }}
           >
-            Enterprise AI Gateway
+            Your Cozy AI Hub
           </p>
 
           <h1
             className='text-4xl sm:text-5xl lg:text-[56px] font-bold leading-[1.1] mb-4'
             style={{ color: 'var(--ld-text-strong)', letterSpacing: '-0.02em' }}
           >
-            RabbitCode
+            草莓兔
           </h1>
           <h2
             className='text-xl sm:text-2xl font-light mb-6'
             style={{ color: 'var(--ld-text-muted)' }}
           >
-            企业级 AI 中转站
+            你的 AI 模型小站
           </h2>
           <p
             className='text-base leading-relaxed mb-8 max-w-md'
             style={{ color: 'var(--ld-text)' }}
           >
-            一站式接入全球主流 AI 模型，丝滑适配 20+ 编程工具。
-            全球网络加速，开箱即用。
+            轻松接入全球主流 AI 模型，丝滑适配 20+ 编程工具。
+            全球加速，开箱即用，温暖陪伴每一行代码。
           </p>
 
           <div className='flex flex-wrap gap-3 mb-12'>
@@ -179,13 +179,13 @@ const TerminalTyping = () => {
   return (
     <div className='ld-terminal'>
       <div className='ld-terminal-bar'>
-        <div className='ld-terminal-dot' style={{ background: '#ff5f57' }} />
-        <div className='ld-terminal-dot' style={{ background: '#febc2e' }} />
-        <div className='ld-terminal-dot' style={{ background: '#28c840' }} />
+        <div className='ld-terminal-dot' style={{ background: '#E8576A' }} />
+        <div className='ld-terminal-dot' style={{ background: '#FFB5C0' }} />
+        <div className='ld-terminal-dot' style={{ background: '#5BAD5E' }} />
         <span
-          style={{ marginLeft: 8, fontSize: 11, color: '#444', letterSpacing: '0.1em' }}
+          style={{ marginLeft: 8, fontSize: 11, color: 'var(--ld-text-muted)', letterSpacing: '0.1em' }}
         >
-          RABBITCODE.SH
+          CMTU.SH
         </span>
       </div>
       <div className='ld-terminal-body' ref={bodyRef}>
