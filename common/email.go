@@ -53,6 +53,10 @@ func SendEmail(subject string, receiver string, content string) error {
 	})
 }
 
+func SendEmailWithAccount(subject string, receiver string, content string, acct *SMTPAccountInfo) error {
+	return sendEmailWithAccount(subject, receiver, content, acct)
+}
+
 func sendEmailWithAccount(subject string, receiver string, content string, acct *SMTPAccountInfo) error {
 	from := acct.From
 	if from == "" {

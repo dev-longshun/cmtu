@@ -374,3 +374,67 @@ func UpdateOption(c *gin.Context) {
 	})
 	return
 }
+
+type SMTPTestRequest struct {
+	Account common.SMTPAccountInfo `json:"account"`
+	To      string                 `json:"to"`
+}
+
+func TestSMTPAccount(c *gin.Context) {
+	var req SMTPTestRequest
+	if err := common.DecodeJson(c.Request.Body, &req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "无效的参数",
+		})
+		return
+	}
+	if req.To == "" || req.Account.Server == "" || req.Account.Account == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": "请填写完整的 SMTP 账号信息和收件邮箱",
+		})
+		return
+	}
+	// 如果 token 为空，尝试从已保存的配置中查找
+	if req.Account.Token == "" {
+		common.OptionMapRWMutex.RLock()
+		oldJSON := common.Interface2String(common.OptionMap["smtp_setting.accounts"])
+		common.OptionMapRWMutex.RUnlock()
+		var oldAccounts []map[string]interface{}
+		if err := common.Unmarshal([]byte(oldJSON), &oldAccounts); err == nil {
+			for _, a := range oldAccounts {
+				if acct, _ := a["account"].(string); acct == req.Account.Account {
+					if token, _ := a["token"].(string); token != "" {
+						req.Account.Token = token
+					}
+					break
+				}
+			}
+		}
+	}
+	if req.Account.Token == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": "SMTP 授权码不能为空",
+		})
+		return
+	}
+	err := common.SendEmailWithAccount(
+		"SMTP 测试邮件",
+		req.To,
+		"<h3>SMTP 测试成功</h3><p>此邮件由 "+req.Account.Account+" 发送，用于验证 SMTP 配置是否正常。</p>",
+		&req.Account,
+	)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("发送失败: %v", err),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "测试邮件发送成功",
+	})
+}

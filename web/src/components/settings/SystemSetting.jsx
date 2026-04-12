@@ -372,6 +372,33 @@ const SystemSetting = () => {
     setSmtpAccounts(smtpAccounts.filter((_, i) => i !== index));
   };
 
+  const [smtpTestEmail, setSmtpTestEmail] = useState('');
+  const [smtpTestLoading, setSmtpTestLoading] = useState({});
+
+  const handleTestSmtpAccount = async (account, index) => {
+    if (!smtpTestEmail) {
+      showError(t('请先填写测试收件邮箱'));
+      return;
+    }
+    setSmtpTestLoading((prev) => ({ ...prev, [index]: true }));
+    try {
+      const res = await API.post('/api/option/test_smtp', {
+        account: account,
+        to: smtpTestEmail,
+      });
+      const { success, message } = res.data;
+      if (success) {
+        showSuccess(message);
+      } else {
+        showError(message);
+      }
+    } catch (e) {
+      showError(t('请求失败'));
+    } finally {
+      setSmtpTestLoading((prev) => ({ ...prev, [index]: false }));
+    }
+  };
+
   const submitEmailDomainWhitelist = async () => {
     if (Array.isArray(emailDomainWhitelist)) {
       await updateOptions([
@@ -1316,6 +1343,12 @@ const SystemSetting = () => {
               <Card>
                 <Form.Section text={t('配置 SMTP')}>
                   <Text>{t('支持多账号轮流发送，分摊单账号每日限额')}</Text>
+                  <Input
+                    value={smtpTestEmail}
+                    placeholder={t('测试收件邮箱')}
+                    onChange={(v) => setSmtpTestEmail(v)}
+                    style={{ marginTop: 12, maxWidth: 360 }}
+                  />
                   <Table
                     dataSource={smtpAccounts}
                     pagination={false}
@@ -1353,15 +1386,24 @@ const SystemSetting = () => {
                       {
                         title: t('操作'),
                         key: 'action',
-                        width: 80,
-                        render: (_, __, index) => (
-                          <Button
-                            type='danger'
-                            size='small'
-                            onClick={() => handleDeleteSmtpAccount(index)}
-                          >
-                            {t('删除')}
-                          </Button>
+                        width: 140,
+                        render: (_, record, index) => (
+                          <div style={{ display: 'flex', gap: 4 }}>
+                            <Button
+                              size='small'
+                              loading={smtpTestLoading[index]}
+                              onClick={() => handleTestSmtpAccount(record, index)}
+                            >
+                              {t('测试')}
+                            </Button>
+                            <Button
+                              type='danger'
+                              size='small'
+                              onClick={() => handleDeleteSmtpAccount(index)}
+                            >
+                              {t('删除')}
+                            </Button>
+                          </div>
                         ),
                       },
                     ]}

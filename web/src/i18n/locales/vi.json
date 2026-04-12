@@ -711,6 +711,8 @@
     "留空则与账户相同": "Để trống sẽ dùng email tài khoản",
     "授权码": "Mã ủy quyền",
     "请填写服务器地址、账户和授权码": "Vui lòng điền địa chỉ máy chủ, tài khoản và mã ủy quyền",
+    "测试收件邮箱": "Email nhận thử nghiệm",
+    "请先填写测试收件邮箱": "Vui lòng nhập email nhận thử nghiệm trước",
     "保存 Telegram 登录设置": "Lưu cài đặt đăng nhập Telegram",
     "保存 Turnstile 设置": "Lưu cài đặt Turnstile",
     "保存 WeChat Server 设置": "Lưu cài đặt WeChat Server",
