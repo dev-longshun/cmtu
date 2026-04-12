@@ -638,6 +638,20 @@ const RegisterForm = () => {
                   </>
                 )}
 
+                <Form.Input
+                  field='aff_code'
+                  label={t('邀请码')}
+                  placeholder={t('选填，输入好友的邀请码')}
+                  name='aff_code'
+                  value={affCode || ''}
+                  onChange={(value) => {
+                    handleChange('aff_code', value);
+                    affCode = value;
+                    if (value) localStorage.setItem('aff', value);
+                  }}
+                  prefix={<IconKey />}
+                />
+
                 {(hasUserAgreement || hasPrivacyPolicy) && (
                   <div className='pt-4'>
                     <Checkbox

@@ -1442,14 +1442,14 @@ const SystemSetting = () => {
                   />
                   <Row gutter={16} style={{ marginTop: 4 }}>
                     <Col xs={24} sm={12} md={10} lg={8}>
-                      <Form.Input
-                        field='_smtpTestEmail'
-                        label={t('测试收件邮箱')}
-                        noLabel={false}
-                        placeholder='test@gmail.com'
-                        value={smtpTestEmail}
-                        onChange={(v) => setSmtpTestEmail(v)}
-                      />
+                      <div style={{ marginBottom: 12 }}>
+                        <Text size='small' style={{ display: 'block', marginBottom: 4 }}>{t('测试收件邮箱')}</Text>
+                        <Input
+                          value={smtpTestEmail}
+                          placeholder='test@gmail.com'
+                          onChange={(v) => setSmtpTestEmail(v)}
+                        />
+                      </div>
                     </Col>
                   </Row>
                   <div style={{ display: 'flex', gap: 8 }}>

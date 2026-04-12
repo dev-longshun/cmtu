@@ -37,6 +37,7 @@ const InvitationCard = ({
   renderQuota,
   setOpenTransfer,
   affLink,
+  affCode,
   handleAffLinkClick,
 }) => {
   return (
@@ -184,6 +185,28 @@ const InvitationCard = ({
                 type='primary'
                 theme='solid'
                 onClick={handleAffLinkClick}
+                icon={<Copy size={14} />}
+                className='!rounded-lg'
+              >
+                {t('复制')}
+              </Button>
+            }
+          />
+          <Input
+            value={affCode || ''}
+            readonly
+            className='!rounded-lg'
+            style={{ marginTop: 8 }}
+            prefix={t('邀请码')}
+            suffix={
+              <Button
+                type='primary'
+                theme='solid'
+                onClick={() => {
+                  if (affCode) {
+                    navigator.clipboard.writeText(affCode);
+                  }
+                }}
                 icon={<Copy size={14} />}
                 className='!rounded-lg'
               >

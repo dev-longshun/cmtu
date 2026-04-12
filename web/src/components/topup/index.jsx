@@ -81,6 +81,7 @@ const TopUp = () => {
 
   // 邀请相关状态
   const [affLink, setAffLink] = useState('');
+  const [affCode, setAffCode] = useState('');
   const [openTransfer, setOpenTransfer] = useState(false);
   const [transferAmount, setTransferAmount] = useState(0);
 
@@ -501,6 +502,7 @@ const TopUp = () => {
     if (success) {
       let link = `${window.location.origin}/register?aff=${data}`;
       setAffLink(link);
+      setAffCode(data);
     } else {
       showError(message);
     }
@@ -782,6 +784,7 @@ const TopUp = () => {
           renderQuota={renderQuota}
           setOpenTransfer={setOpenTransfer}
           affLink={affLink}
+          affCode={affCode}
           handleAffLinkClick={handleAffLinkClick}
         />
       </div>
