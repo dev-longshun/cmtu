@@ -1,263 +1,55 @@
 /* ============================================
-   草莓兔 Landing Page Styles (ld-* prefix)
-   Warm strawberry theme — light/dark dual mode
+   草莓兔 Landing Page — Minimal Style
    ============================================ */
 
 .ld-root {
-  /* Light mode (default) — warm creamy strawberry */
-  --ld-bg: #FFF8F6;
-  --ld-bg-card: #FFFFFF;
-  --ld-bg-card-hover: #FFF0ED;
-  --ld-bg-terminal: #FFF5F3;
-  --ld-text: #6B5B5B;
-  --ld-text-muted: #A89494;
-  --ld-text-strong: #3D2C2C;
-  --ld-border: rgba(210, 150, 150, 0.18);
-  --ld-border-hover: rgba(210, 150, 150, 0.35);
+  --ld-bg: #FFF0ED;
   --ld-accent: #E8576A;
-  --ld-accent-light: #FFC1C8;
-  --ld-max-w: 1200px;
 
   background: var(--ld-bg);
-  color: var(--ld-text);
   min-height: 100vh;
-  overflow-x: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Dark mode — deep berry */
 body[theme-mode="dark"] .ld-root,
 .dark .ld-root {
   --ld-bg: #1A1215;
-  --ld-bg-card: #231A1D;
-  --ld-bg-card-hover: #2D2024;
-  --ld-bg-terminal: #1E1518;
-  --ld-text: #C4A8AD;
-  --ld-text-muted: #8A6E73;
-  --ld-text-strong: #F5E6E8;
-  --ld-border: rgba(245, 180, 190, 0.1);
-  --ld-border-hover: rgba(245, 180, 190, 0.2);
   --ld-accent: #F06B7E;
-  --ld-accent-light: #4A2530;
 }
 
-/* --- Smooth scroll-triggered fade --- */
-.ld-fade {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s cubic-bezier(0.25, 0.1, 0.25, 1),
-              transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
-}
-.ld-fade.ld-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* --- Terminal --- */
-.ld-terminal {
-  background: var(--ld-bg-terminal);
-  border: 1px solid var(--ld-border);
-  border-radius: 12px;
-  overflow: hidden;
-  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-  font-size: 13px;
-  line-height: 1.8;
-}
-.ld-terminal-bar {
+.ld-hero {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--ld-border);
-}
-.ld-terminal-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-.ld-terminal-body {
-  padding: 20px 24px;
-  overflow-x: auto;
-  min-height: 180px;
-}
-.ld-terminal-body .ld-dim { color: var(--ld-text-muted); }
-.ld-terminal-body .ld-key { color: var(--ld-text); }
-.ld-terminal-body .ld-val { color: var(--ld-text-strong); }
-.ld-terminal-body .ld-str { color: var(--ld-text); }
-.ld-terminal-body .ld-ok  { color: var(--ld-accent); }
-
-/* --- Typing cursor --- */
-@keyframes ld-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-.ld-cursor {
-  display: inline-block;
-  width: 8px;
-  height: 16px;
-  background: var(--ld-text-muted);
-  vertical-align: text-bottom;
-  margin-left: 2px;
-  animation: ld-blink 1s step-end infinite;
+  gap: 16px;
+  padding: 40px 24px;
 }
 
-/* --- Badge tags (models / tools) --- */
-.ld-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border: 1px solid var(--ld-border);
-  border-radius: 6px;
-  font-size: 12px;
-  color: var(--ld-text);
-  white-space: nowrap;
-  transition: border-color 0.2s;
-  flex-shrink: 0;
-}
-.ld-badge:hover {
-  border-color: var(--ld-border-hover);
+.ld-hero-logo {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 24px;
 }
 
-/* --- Inline auto-scroll track for badges --- */
-@keyframes ld-badge-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.ld-badge-scroll {
-  overflow: hidden;
-  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-}
-.ld-badge-track {
-  display: flex;
-  gap: 8px;
-  width: max-content;
-  animation: ld-badge-scroll var(--ld-badge-speed, 20s) linear infinite;
-}
-.ld-badge-track:hover {
-  animation-play-state: paused;
-}
-.ld-badge-track--reverse {
-  animation-direction: reverse;
+.ld-hero-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--ld-accent);
+  margin: 0;
+  letter-spacing: 0.04em;
 }
 
-/* --- Cards --- */
-.ld-card {
-  background: var(--ld-bg-card);
-  border: 1px solid var(--ld-border);
-  border-radius: 12px;
-  padding: 28px;
-  transition: border-color 0.3s, transform 0.3s;
-}
-.ld-card:hover {
-  border-color: var(--ld-border-hover);
-  transform: translateY(-2px);
+.ld-hero-tagline {
+  font-size: 16px;
+  color: #8A6E73;
+  margin: 0;
+  letter-spacing: 0.05em;
 }
 
-/* --- Step number --- */
-.ld-step-num {
-  font-size: 40px;
-  font-weight: 800;
-  color: var(--ld-accent-light);
-  line-height: 1;
-  letter-spacing: -2px;
-}
-
-/* --- FAQ --- */
-.ld-faq-item {
-  border-bottom: 1px solid var(--ld-border);
-}
-.ld-faq-trigger {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 0;
-  background: transparent;
-  border: none;
-  color: var(--ld-text-strong);
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  text-align: left;
-}
-.ld-faq-trigger svg {
-  transition: transform 0.3s;
-  flex-shrink: 0;
-  color: var(--ld-text-muted);
-}
-.ld-faq-trigger[aria-expanded='true'] svg {
-  transform: rotate(180deg);
-}
-.ld-faq-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease;
-}
-.ld-faq-body--open {
-  max-height: 300px;
-}
-.ld-faq-content {
-  padding: 0 0 20px;
-  color: var(--ld-text-muted);
-  line-height: 1.8;
-  font-size: 14px;
-}
-
-/* --- Buttons --- */
-.ld-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 28px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-decoration: none;
-  letter-spacing: 0.02em;
-}
-.ld-btn--primary {
-  background: var(--ld-accent);
-  color: #fff;
-  border: 1px solid var(--ld-accent);
-}
-.ld-btn--primary:hover {
-  background: #D64A5C;
-  border-color: #D64A5C;
-}
-.ld-btn--ghost {
-  background: transparent;
-  color: var(--ld-text);
-  border: 1px solid var(--ld-border);
-}
-.ld-btn--ghost:hover {
-  border-color: var(--ld-border-hover);
-  color: var(--ld-text-strong);
-}
-
-/* --- Section divider (subtle) --- */
-.ld-divider {
-  width: 40px;
-  height: 1px;
-  background: var(--ld-border);
-  margin: 0 auto;
-}
-
-/* --- Reduced Motion --- */
-@media (prefers-reduced-motion: reduce) {
-  .ld-fade { opacity: 1; transform: none; transition: none; }
-  .ld-cursor { animation: none; }
-  .ld-card { transition: none; }
-  .ld-faq-body { transition: none; }
-  .ld-badge-track { animation: none; }
-}
-
-/* --- Responsive --- */
-@media (max-width: 768px) {
-  .ld-terminal { font-size: 11px; }
-  .ld-card { padding: 20px; }
-  .ld-step-num { font-size: 32px; }
+body[theme-mode="dark"] .ld-hero-tagline,
+.dark .ld-hero-tagline {
+  color: #C4A8AD;
 }
