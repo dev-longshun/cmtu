@@ -1343,12 +1343,6 @@ const SystemSetting = () => {
               <Card>
                 <Form.Section text={t('配置 SMTP')}>
                   <Text>{t('支持多账号轮流发送，分摊单账号每日限额')}</Text>
-                  <Input
-                    value={smtpTestEmail}
-                    placeholder={t('测试收件邮箱')}
-                    onChange={(v) => setSmtpTestEmail(v)}
-                    style={{ marginTop: 12, maxWidth: 360 }}
-                  />
                   <Table
                     dataSource={smtpAccounts}
                     pagination={false}
@@ -1411,6 +1405,18 @@ const SystemSetting = () => {
                       <Text type='tertiary'>{t('暂无 SMTP 账号')}</Text>
                     }
                   />
+                  <Row gutter={16} style={{ marginTop: 4 }}>
+                    <Col xs={24} sm={12} md={10} lg={8}>
+                      <Form.Input
+                        field='_smtpTestEmail'
+                        label={t('测试收件邮箱')}
+                        noLabel={false}
+                        placeholder='test@gmail.com'
+                        value={smtpTestEmail}
+                        onChange={(v) => setSmtpTestEmail(v)}
+                      />
+                    </Col>
+                  </Row>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <Button
                       onClick={() => setSmtpModalVisible(true)}
