@@ -14,6 +14,7 @@ import (
 )
 
 func SetRouter(router *gin.Engine, buildFS embed.FS, indexPage []byte) {
+	router.Static("/uploads", "./data/uploads")
 	SetApiRouter(router)
 	SetDashboardRouter(router)
 	SetRelayRouter(router)

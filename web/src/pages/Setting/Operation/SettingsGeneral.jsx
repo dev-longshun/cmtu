@@ -29,6 +29,7 @@ import {
   Select,
   InputGroup,
   Input,
+  Upload,
 } from '@douyinfe/semi-ui';
 import {
   compareObjects,
@@ -196,14 +197,37 @@ export default function GeneralSettings(props) {
                 />
               </Col>
               <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-                <Form.Input
-                  field={'general_setting.contact_qrcode'}
-                  label={t('联系二维码图片地址')}
-                  initValue={''}
-                  placeholder={t('例如 https://example.com/qrcode.png')}
-                  onChange={handleFieldChange('general_setting.contact_qrcode')}
-                  showClear
-                />
+                <Form.Slot label={t('联系二维码图片')}>
+                  <Upload
+                    action='/api/upload'
+                    name='file'
+                    accept='image/jpeg,image/png,image/gif,image/webp'
+                    maxSize={5120}
+                    limit={1}
+                    draggable={true}
+                    dragMainText={t('点击或拖拽上传二维码图片')}
+                    dragSubText={t('支持 JPG、PNG、GIF、WebP，最大 5MB')}
+                    onSuccess={(responseBody) => {
+                      if (responseBody?.response?.success) {
+                        handleFieldChange('general_setting.contact_qrcode')(responseBody.response.data);
+                        showSuccess(t('上传成功'));
+                      }
+                    }}
+                    onError={() => showError(t('上传失败'))}
+                  />
+                  {inputs['general_setting.contact_qrcode'] && (
+                    <div className='mt-2 flex flex-col items-center gap-1'>
+                      <img
+                        src={inputs['general_setting.contact_qrcode']}
+                        alt='QR Code'
+                        className='w-32 h-32 rounded-lg object-contain border'
+                      />
+                      <span className='text-xs text-semi-color-text-2 break-all'>
+                        {inputs['general_setting.contact_qrcode']}
+                      </span>
+                    </div>
+                  )}
+                </Form.Slot>
               </Col>
               <Col xs={24} sm={12} md={8} lg={8} xl={8}>
                 <Form.Input
