@@ -5,7 +5,7 @@
 .ld-root {
   --ld-bg: #FFE4E1;
   --ld-accent: #E8576A;
-  --ld-tagline: #FFFFFF;
+  --ld-tagline: #8B3A4A;
 
   background: var(--ld-bg) !important;
   min-height: 100vh;
