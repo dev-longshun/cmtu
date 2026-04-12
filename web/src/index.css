@@ -13,6 +13,22 @@
   @tailwind utilities;
 }
 
+/* 首页 Header 强制酒红色 */
+.header-homepage,
+.header-homepage *,
+.header-homepage svg {
+  color: #5C2434 !important;
+  fill: currentColor;
+}
+.header-homepage .semi-button,
+.header-homepage .semi-icon {
+  color: #5C2434 !important;
+}
+/* 保留联系按钮的绿色白字 */
+.header-homepage .text-white {
+  color: #fff !important;
+}
+
 /* ==================== 全局基础样式 ==================== */
 :root {
   --sidebar-width: 180px;

@@ -68,7 +68,7 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
   const { mainNavLinks } = useNavigation(t, docsLink, headerNavModules);
 
   return (
-    <header className={`sticky top-0 z-50 transition-colors duration-300 ${isHomePage ? 'bg-white !text-[#5C2434]' : 'text-semi-color-text-0 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-lg'}`}>
+    <header className={`sticky top-0 z-50 transition-colors duration-300 ${isHomePage ? 'header-homepage bg-white' : 'text-semi-color-text-0 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-lg'}`}>
       <NoticeModal
         visible={noticeVisible}
         onClose={handleNoticeClose}
