@@ -91,6 +91,7 @@ export const useHeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
   }, [headerNavModules]);
 
   const isConsoleRoute = location.pathname.startsWith('/console');
+  const isHomePage = location.pathname === '/';
 
   const theme = useTheme();
   const actualTheme = useActualTheme();
@@ -239,6 +240,7 @@ export const useHeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
     contactQRCode,
     contactLabel,
     isConsoleRoute,
+    isHomePage,
     theme,
     drawerOpen,
     headerNavModules,

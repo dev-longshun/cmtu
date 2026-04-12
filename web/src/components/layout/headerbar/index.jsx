@@ -45,6 +45,7 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
     contactQRCode,
     contactLabel,
     isConsoleRoute,
+    isHomePage,
     theme,
     headerNavModules,
     pricingRequireAuth,
@@ -67,7 +68,7 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
   const { mainNavLinks } = useNavigation(t, docsLink, headerNavModules);
 
   return (
-    <header className='sticky top-0 z-50 transition-colors duration-300 bg-white dark:bg-zinc-900' style={{ color: '#5C2434' }}>
+    <header className={`sticky top-0 z-50 transition-colors duration-300 ${isHomePage ? 'bg-white !text-[#5C2434]' : 'text-semi-color-text-0 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-lg'}`}>
       <NoticeModal
         visible={noticeVisible}
         onClose={handleNoticeClose}
@@ -91,6 +92,7 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
             <HeaderLogo
               isMobile={isMobile}
               isConsoleRoute={isConsoleRoute}
+              isHomePage={isHomePage}
               logo={logo}
               logoLoaded={logoLoaded}
               isLoading={isLoading}

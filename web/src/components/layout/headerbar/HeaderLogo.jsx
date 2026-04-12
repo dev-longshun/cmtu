@@ -25,6 +25,7 @@ import SkeletonWrapper from '../components/SkeletonWrapper';
 const HeaderLogo = ({
   isMobile,
   isConsoleRoute,
+  isHomePage,
   logo,
   logoLoaded,
   isLoading,
@@ -58,7 +59,7 @@ const HeaderLogo = ({
             <Typography.Title
               heading={4}
               className='!text-lg !font-semibold !mb-0'
-              style={{ color: '#5C2434' }}
+              style={isHomePage ? { color: '#5C2434' } : undefined}
             >
               {systemName}
             </Typography.Title>
