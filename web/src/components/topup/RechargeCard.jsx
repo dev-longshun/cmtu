@@ -54,6 +54,16 @@ import SubscriptionPlansCard from './SubscriptionPlansCard';
 
 const { Text } = Typography;
 
+// USD ↔ 显示货币转换（用于充值输入框）
+const usdToDisplay = (usd) => {
+  const { rate } = getCurrencyConfig();
+  return Math.round(usd * (rate || 1));
+};
+const displayToUsd = (display) => {
+  const { rate } = getCurrencyConfig();
+  return Math.round(display / (rate || 1));
+};
+
 const RechargeCard = ({
   t,
   enableOnlineTopUp,
@@ -250,6 +260,12 @@ const RechargeCard = ({
                       max={999999999}
                       step={1}
                       precision={0}
+                      formatter={(value) =>
+                        value ? String(usdToDisplay(Number(value))) : ''
+                      }
+                      parser={(value) =>
+                        value ? String(displayToUsd(Number(value))) : ''
+                      }
                       onChange={async (value) => {
                         if (value && value >= 1) {
                           setTopUpCount(value);
@@ -258,10 +274,11 @@ const RechargeCard = ({
                         }
                       }}
                       onBlur={(e) => {
-                        const value = parseInt(e.target.value);
-                        if (!value || value < 1) {
-                          setTopUpCount(1);
-                          getAmount(1);
+                        const displayVal = parseInt(e.target.value);
+                        const usdVal = displayToUsd(displayVal);
+                        if (!usdVal || usdVal < 1) {
+                          setTopUpCount(minTopUp);
+                          getAmount(minTopUp);
                         }
                       }}
                       formatter={(value) => (value ? `${value}` : '')}
