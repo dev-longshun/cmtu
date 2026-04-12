@@ -31,9 +31,9 @@ var generalSetting = GeneralSetting{
 	DocsLink:                   "https://docs.newapi.pro",
 	PingIntervalEnabled:        false,
 	PingIntervalSeconds:        60,
-	QuotaDisplayType:           QuotaDisplayTypeUSD,
-	CustomCurrencySymbol:       "¤",
-	CustomCurrencyExchangeRate: 1.0,
+	QuotaDisplayType:           QuotaDisplayTypeCustom,
+	CustomCurrencySymbol:       "🍓",
+	CustomCurrencyExchangeRate: 100.0,
 }
 
 func init() {
@@ -71,7 +71,7 @@ func GetCurrencySymbol() string {
 		if generalSetting.CustomCurrencySymbol != "" {
 			return generalSetting.CustomCurrencySymbol
 		}
-		return "¤"
+		return "🍓"
 	default:
 		return ""
 	}

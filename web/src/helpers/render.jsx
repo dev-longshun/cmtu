@@ -1000,7 +1000,7 @@ export function renderQuotaNumberWithDigit(num, digits = 2) {
     return '$' + num;
   } else if (quotaDisplayType === 'CUSTOM') {
     const statusStr = localStorage.getItem('status');
-    let symbol = '¤';
+    let symbol = '🍓';
     try {
       if (statusStr) {
         const s = JSON.parse(statusStr);
@@ -1070,7 +1070,7 @@ export function renderQuotaWithAmount(amount) {
     return '¥' + amount;
   } else if (quotaDisplayType === 'CUSTOM') {
     const statusStr = localStorage.getItem('status');
-    let symbol = '¤';
+    let symbol = '🍓';
     try {
       if (statusStr) {
         const s = JSON.parse(statusStr);
@@ -1105,7 +1105,7 @@ export function getCurrencyConfig() {
     try {
       if (statusStr) {
         const s = JSON.parse(statusStr);
-        symbol = s?.custom_currency_symbol || '¤';
+        symbol = s?.custom_currency_symbol || '🍓';
         rate = s?.custom_currency_exchange_rate || 1;
       }
     } catch (e) {}
@@ -1149,7 +1149,7 @@ export function renderQuota(quota, digits = 2) {
     symbol = '¥';
   } else if (quotaDisplayType === 'CUSTOM') {
     const statusStr = localStorage.getItem('status');
-    let symbolCustom = '¤';
+    let symbolCustom = '🍓';
     let rate = 1;
     try {
       if (statusStr) {

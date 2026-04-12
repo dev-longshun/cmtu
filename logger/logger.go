@@ -108,7 +108,7 @@ func LogQuota(quota int) string {
 		rate := operation_setting.GetGeneralSetting().CustomCurrencyExchangeRate
 		symbol := operation_setting.GetGeneralSetting().CustomCurrencySymbol
 		if symbol == "" {
-			symbol = "¤"
+			symbol = "🍓"
 		}
 		if rate <= 0 {
 			rate = 1
@@ -134,7 +134,7 @@ func FormatQuota(quota int) string {
 		rate := operation_setting.GetGeneralSetting().CustomCurrencyExchangeRate
 		symbol := operation_setting.GetGeneralSetting().CustomCurrencySymbol
 		if symbol == "" {
-			symbol = "¤"
+			symbol = "🍓"
 		}
 		if rate <= 0 {
 			rate = 1

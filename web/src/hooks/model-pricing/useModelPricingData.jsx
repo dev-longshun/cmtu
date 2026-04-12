@@ -69,7 +69,7 @@ export const useModelPricingData = () => {
     [statusState],
   );
   const customCurrencySymbol = useMemo(
-    () => statusState?.status?.custom_currency_symbol ?? '¤',
+    () => statusState?.status?.custom_currency_symbol ?? '🍓',
     [statusState],
   );
 

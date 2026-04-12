@@ -221,7 +221,7 @@ export default function SettingsPaymentGatewayCreem(props) {
       dataIndex: 'price',
       key: 'price',
       render: (price, record) =>
-        `${record.currency === 'EUR' ? '€' : '$'}${price}`,
+        `${record.currency === 'EUR' ? '€' : '🍓'}${price}`,
     },
     {
       title: t('充值额度'),

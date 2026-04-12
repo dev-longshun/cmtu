@@ -506,7 +506,7 @@ const RechargeCard = ({
                           {t('充值额度')}: {product.quota}
                         </div>
                         <div className='text-lg font-semibold text-blue-600'>
-                          {product.currency === 'EUR' ? '€' : '$'}
+                          {product.currency === 'EUR' ? '€' : '🍓'}
                           {product.price}
                         </div>
                       </Card>

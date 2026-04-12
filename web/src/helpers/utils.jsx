@@ -677,7 +677,7 @@ export const calculateModelPrice = ({
       };
     }
 
-    let symbol = '$';
+    let symbol = '🍓';
     if (currency === 'CNY') {
       symbol = '¥';
     } else if (currency === 'CUSTOM') {
@@ -685,12 +685,12 @@ export const calculateModelPrice = ({
         const statusStr = localStorage.getItem('status');
         if (statusStr) {
           const s = JSON.parse(statusStr);
-          symbol = s?.custom_currency_symbol || '¤';
+          symbol = s?.custom_currency_symbol || '🍓';
         } else {
-          symbol = '¤';
+          symbol = '🍓';
         }
       } catch (e) {
-        symbol = '¤';
+        symbol = '🍓';
       }
     }
 
