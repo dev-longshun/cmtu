@@ -10,48 +10,79 @@ import (
 	"time"
 )
 
-func generateMessageID() (string, error) {
-	split := strings.Split(SMTPFrom, "@")
+// SMTPAccountInfo 用于传递 SMTP 账号参数，避免循环依赖
+type SMTPAccountInfo struct {
+	Server     string
+	Port       int
+	Account    string
+	From       string
+	Token      string
+	SSLEnabled bool
+}
+
+// SMTPAccountProvider 由 smtp_setting 包注册，返回下一个轮选账号
+var SMTPAccountProvider func() *SMTPAccountInfo
+
+func generateMessageIDWithFrom(from string) (string, error) {
+	split := strings.Split(from, "@")
 	if len(split) < 2 {
 		return "", fmt.Errorf("invalid SMTP account")
 	}
-	domain := strings.Split(SMTPFrom, "@")[1]
+	domain := split[1]
 	return fmt.Sprintf("<%d.%s@%s>", time.Now().UnixNano(), GetRandomString(12), domain), nil
 }
 
 func SendEmail(subject string, receiver string, content string) error {
-	if SMTPFrom == "" { // for compatibility
-		SMTPFrom = SMTPAccount
+	// 优先使用多账号轮选
+	if SMTPAccountProvider != nil {
+		if acct := SMTPAccountProvider(); acct != nil {
+			return sendEmailWithAccount(subject, receiver, content, acct)
+		}
 	}
-	id, err2 := generateMessageID()
-	if err2 != nil {
-		return err2
-	}
+	// 回退到旧的全局变量配置
 	if SMTPServer == "" && SMTPAccount == "" {
 		return fmt.Errorf("SMTP 服务器未配置")
+	}
+	return sendEmailWithAccount(subject, receiver, content, &SMTPAccountInfo{
+		Server:     SMTPServer,
+		Port:       SMTPPort,
+		Account:    SMTPAccount,
+		From:       SMTPFrom,
+		Token:      SMTPToken,
+		SSLEnabled: SMTPSSLEnabled,
+	})
+}
+
+func sendEmailWithAccount(subject string, receiver string, content string, acct *SMTPAccountInfo) error {
+	from := acct.From
+	if from == "" {
+		from = acct.Account
+	}
+	id, err := generateMessageIDWithFrom(from)
+	if err != nil {
+		return err
 	}
 	encodedSubject := fmt.Sprintf("=?UTF-8?B?%s?=", base64.StdEncoding.EncodeToString([]byte(subject)))
 	mail := []byte(fmt.Sprintf("To: %s\r\n"+
 		"From: %s <%s>\r\n"+
 		"Subject: %s\r\n"+
 		"Date: %s\r\n"+
-		"Message-ID: %s\r\n"+ // 添加 Message-ID 头
+		"Message-ID: %s\r\n"+
 		"Content-Type: text/html; charset=UTF-8\r\n\r\n%s\r\n",
-		receiver, SystemName, SMTPFrom, encodedSubject, time.Now().Format(time.RFC1123Z), id, content))
-	auth := smtp.PlainAuth("", SMTPAccount, SMTPToken, SMTPServer)
-	addr := fmt.Sprintf("%s:%d", SMTPServer, SMTPPort)
+		receiver, SystemName, from, encodedSubject, time.Now().Format(time.RFC1123Z), id, content))
+	auth := smtp.PlainAuth("", acct.Account, acct.Token, acct.Server)
+	addr := fmt.Sprintf("%s:%d", acct.Server, acct.Port)
 	to := strings.Split(receiver, ";")
-	var err error
-	if SMTPPort == 465 || SMTPSSLEnabled {
+	if acct.Port == 465 || acct.SSLEnabled {
 		tlsConfig := &tls.Config{
 			InsecureSkipVerify: true,
-			ServerName:         SMTPServer,
+			ServerName:         acct.Server,
 		}
-		conn, err := tls.Dial("tcp", fmt.Sprintf("%s:%d", SMTPServer, SMTPPort), tlsConfig)
+		conn, err := tls.Dial("tcp", fmt.Sprintf("%s:%d", acct.Server, acct.Port), tlsConfig)
 		if err != nil {
 			return err
 		}
-		client, err := smtp.NewClient(conn, SMTPServer)
+		client, err := smtp.NewClient(conn, acct.Server)
 		if err != nil {
 			return err
 		}
@@ -59,12 +90,12 @@ func SendEmail(subject string, receiver string, content string) error {
 		if err = client.Auth(auth); err != nil {
 			return err
 		}
-		if err = client.Mail(SMTPFrom); err != nil {
+		if err = client.Mail(from); err != nil {
 			return err
 		}
 		receiverEmails := strings.Split(receiver, ";")
-		for _, receiver := range receiverEmails {
-			if err = client.Rcpt(receiver); err != nil {
+		for _, r := range receiverEmails {
+			if err = client.Rcpt(r); err != nil {
 				return err
 			}
 		}
@@ -80,11 +111,11 @@ func SendEmail(subject string, receiver string, content string) error {
 		if err != nil {
 			return err
 		}
-	} else if isOutlookServer(SMTPAccount) || slices.Contains(EmailLoginAuthServerList, SMTPServer) {
-		auth = LoginAuth(SMTPAccount, SMTPToken)
-		err = smtp.SendMail(addr, auth, SMTPFrom, to, mail)
+	} else if isOutlookServer(acct.Account) || slices.Contains(EmailLoginAuthServerList, acct.Server) {
+		auth = LoginAuth(acct.Account, acct.Token)
+		err = smtp.SendMail(addr, auth, from, to, mail)
 	} else {
-		err = smtp.SendMail(addr, auth, SMTPFrom, to, mail)
+		err = smtp.SendMail(addr, auth, from, to, mail)
 	}
 	if err != nil {
 		SysError(fmt.Sprintf("failed to send email to %s: %v", receiver, err))

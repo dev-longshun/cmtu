@@ -16,6 +16,64 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// maskSMTPAccountTokens 对 SMTP 多账号 JSON 中的 token 字段脱敏
+func maskSMTPAccountTokens(jsonStr string) string {
+	var accounts []map[string]interface{}
+	if err := common.Unmarshal([]byte(jsonStr), &accounts); err != nil {
+		return jsonStr
+	}
+	for i := range accounts {
+		if _, ok := accounts[i]["token"]; ok {
+			accounts[i]["token"] = ""
+		}
+	}
+	masked, err := common.Marshal(accounts)
+	if err != nil {
+		return jsonStr
+	}
+	return string(masked)
+}
+
+// mergeSMTPAccountTokens 前端提交时 token 为空表示未修改，从现有配置回填
+func mergeSMTPAccountTokens(newJSON string) string {
+	var newAccounts []map[string]interface{}
+	if err := common.Unmarshal([]byte(newJSON), &newAccounts); err != nil {
+		return newJSON
+	}
+	// 读取现有配置
+	common.OptionMapRWMutex.RLock()
+	oldJSON := common.Interface2String(common.OptionMap["smtp_setting.accounts"])
+	common.OptionMapRWMutex.RUnlock()
+	var oldAccounts []map[string]interface{}
+	if err := common.Unmarshal([]byte(oldJSON), &oldAccounts); err != nil {
+		return newJSON
+	}
+	// 按 account 字段匹配，回填空 token
+	oldMap := make(map[string]string)
+	for _, a := range oldAccounts {
+		if acct, ok := a["account"].(string); ok {
+			if token, ok := a["token"].(string); ok {
+				oldMap[acct] = token
+			}
+		}
+	}
+	for i, a := range newAccounts {
+		token, _ := a["token"].(string)
+		if token == "" {
+			if acct, ok := a["account"].(string); ok {
+				if oldToken, exists := oldMap[acct]; exists {
+					newAccounts[i]["token"] = oldToken
+				}
+			}
+		}
+	}
+	merged, err := common.Marshal(newAccounts)
+	if err != nil {
+		return newJSON
+	}
+	return string(merged)
+}
+
 var completionRatioMetaOptionKeys = []string{
 	"ModelPrice",
 	"ModelRatio",
@@ -72,6 +130,10 @@ func GetOptions(c *gin.Context) {
 			strings.HasSuffix(k, "secret") ||
 			strings.HasSuffix(k, "api_key") {
 			continue
+		}
+		// SMTP 多账号配置：脱敏 token 字段
+		if k == "smtp_setting.accounts" {
+			value = maskSMTPAccountTokens(value)
 		}
 		options = append(options, &model.Option{
 			Key:   k,
@@ -296,6 +358,10 @@ func UpdateOption(c *gin.Context) {
 			})
 			return
 		}
+	}
+	// SMTP 多账号：前端提交时 token 为空表示未修改，需要从现有配置回填
+	if option.Key == "smtp_setting.accounts" {
+		option.Value = mergeSMTPAccountTokens(option.Value.(string))
 	}
 	err = model.UpdateOption(option.Key, option.Value.(string))
 	if err != nil {

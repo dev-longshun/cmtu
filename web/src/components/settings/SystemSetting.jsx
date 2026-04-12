@@ -31,6 +31,11 @@ import {
   Card,
   Radio,
   Select,
+  Table,
+  Tag,
+  Input,
+  InputNumber,
+  Checkbox,
 } from '@douyinfe/semi-ui';
 const { Text } = Typography;
 import {
@@ -126,6 +131,18 @@ const SystemSetting = () => {
   const [ipList, setIpList] = useState([]);
   const [allowedPorts, setAllowedPorts] = useState([]);
 
+  // SMTP 多账号状态
+  const [smtpAccounts, setSmtpAccounts] = useState([]);
+  const [smtpModalVisible, setSmtpModalVisible] = useState(false);
+  const [smtpForm, setSmtpForm] = useState({
+    server: '',
+    port: 465,
+    account: '',
+    from: '',
+    token: '',
+    ssl_enabled: true,
+  });
+
   const getOptions = async () => {
     setLoading(true);
     const res = await API.get('/api/option/');
@@ -169,6 +186,14 @@ const SystemSetting = () => {
               setAllowedPorts(Array.isArray(ports) ? ports : []);
             } catch (e) {
               setAllowedPorts(['80', '443', '8080', '8443']);
+            }
+            break;
+          case 'smtp_setting.accounts':
+            try {
+              const accounts = item.value ? JSON.parse(item.value) : [];
+              setSmtpAccounts(Array.isArray(accounts) ? accounts : []);
+            } catch (e) {
+              setSmtpAccounts([]);
             }
             break;
           case 'PasswordLoginEnabled':
@@ -318,33 +343,33 @@ const SystemSetting = () => {
   };
 
   const submitSMTP = async () => {
-    const options = [];
+    await updateOptions([
+      {
+        key: 'smtp_setting.accounts',
+        value: JSON.stringify(smtpAccounts),
+      },
+    ]);
+  };
 
-    if (originInputs['SMTPServer'] !== inputs.SMTPServer) {
-      options.push({ key: 'SMTPServer', value: inputs.SMTPServer });
+  const handleAddSmtpAccount = () => {
+    if (!smtpForm.server || !smtpForm.account || !smtpForm.token) {
+      showError(t('请填写服务器地址、账户和授权码'));
+      return;
     }
-    if (originInputs['SMTPAccount'] !== inputs.SMTPAccount) {
-      options.push({ key: 'SMTPAccount', value: inputs.SMTPAccount });
-    }
-    if (originInputs['SMTPFrom'] !== inputs.SMTPFrom) {
-      options.push({ key: 'SMTPFrom', value: inputs.SMTPFrom });
-    }
-    if (
-      originInputs['SMTPPort'] !== inputs.SMTPPort &&
-      inputs.SMTPPort !== ''
-    ) {
-      options.push({ key: 'SMTPPort', value: inputs.SMTPPort });
-    }
-    if (
-      originInputs['SMTPToken'] !== inputs.SMTPToken &&
-      inputs.SMTPToken !== ''
-    ) {
-      options.push({ key: 'SMTPToken', value: inputs.SMTPToken });
-    }
+    setSmtpAccounts([...smtpAccounts, { ...smtpForm }]);
+    setSmtpForm({
+      server: '',
+      port: 465,
+      account: '',
+      from: '',
+      token: '',
+      ssl_enabled: true,
+    });
+    setSmtpModalVisible(false);
+  };
 
-    if (options.length > 0) {
-      await updateOptions(options);
-    }
+  const handleDeleteSmtpAccount = (index) => {
+    setSmtpAccounts(smtpAccounts.filter((_, i) => i !== index));
   };
 
   const submitEmailDomainWhitelist = async () => {
@@ -1290,54 +1315,135 @@ const SystemSetting = () => {
               </Card>
               <Card>
                 <Form.Section text={t('配置 SMTP')}>
-                  <Text>{t('用以支持系统的邮件发送')}</Text>
-                  <Row
-                    gutter={{ xs: 8, sm: 16, md: 24, lg: 24, xl: 24, xxl: 24 }}
+                  <Text>{t('支持多账号轮流发送，分摊单账号每日限额')}</Text>
+                  <Table
+                    dataSource={smtpAccounts}
+                    pagination={false}
+                    size='small'
+                    style={{ marginTop: 12, marginBottom: 12 }}
+                    columns={[
+                      {
+                        title: t('SMTP 服务器地址'),
+                        dataIndex: 'server',
+                        key: 'server',
+                      },
+                      {
+                        title: t('SMTP 端口'),
+                        dataIndex: 'port',
+                        key: 'port',
+                        width: 80,
+                      },
+                      {
+                        title: t('SMTP 账户'),
+                        dataIndex: 'account',
+                        key: 'account',
+                      },
+                      {
+                        title: 'SSL',
+                        dataIndex: 'ssl_enabled',
+                        key: 'ssl_enabled',
+                        width: 60,
+                        render: (v) =>
+                          v ? (
+                            <Tag color='green'>ON</Tag>
+                          ) : (
+                            <Tag color='grey'>OFF</Tag>
+                          ),
+                      },
+                      {
+                        title: t('操作'),
+                        key: 'action',
+                        width: 80,
+                        render: (_, __, index) => (
+                          <Button
+                            type='danger'
+                            size='small'
+                            onClick={() => handleDeleteSmtpAccount(index)}
+                          >
+                            {t('删除')}
+                          </Button>
+                        ),
+                      },
+                    ]}
+                    empty={
+                      <Text type='tertiary'>{t('暂无 SMTP 账号')}</Text>
+                    }
+                  />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <Button
+                      onClick={() => setSmtpModalVisible(true)}
+                    >
+                      {t('添加 SMTP 账号')}
+                    </Button>
+                    <Button
+                      type='primary'
+                      onClick={submitSMTP}
+                    >
+                      {t('保存 SMTP 设置')}
+                    </Button>
+                  </div>
+                  <Modal
+                    title={t('添加 SMTP 账号')}
+                    visible={smtpModalVisible}
+                    onOk={handleAddSmtpAccount}
+                    onCancel={() => setSmtpModalVisible(false)}
+                    okText={t('添加')}
+                    cancelText={t('取消')}
                   >
-                    <Col xs={24} sm={24} md={8} lg={8} xl={8}>
-                      <Form.Input
-                        field='SMTPServer'
-                        label={t('SMTP 服务器地址')}
-                      />
-                    </Col>
-                    <Col xs={24} sm={24} md={8} lg={8} xl={8}>
-                      <Form.Input field='SMTPPort' label={t('SMTP 端口')} />
-                    </Col>
-                    <Col xs={24} sm={24} md={8} lg={8} xl={8}>
-                      <Form.Input field='SMTPAccount' label={t('SMTP 账户')} />
-                    </Col>
-                  </Row>
-                  <Row
-                    gutter={{ xs: 8, sm: 16, md: 24, lg: 24, xl: 24, xxl: 24 }}
-                    style={{ marginTop: 16 }}
-                  >
-                    <Col xs={24} sm={24} md={8} lg={8} xl={8}>
-                      <Form.Input
-                        field='SMTPFrom'
-                        label={t('SMTP 发送者邮箱')}
-                      />
-                    </Col>
-                    <Col xs={24} sm={24} md={8} lg={8} xl={8}>
-                      <Form.Input
-                        field='SMTPToken'
-                        label={t('SMTP 访问凭证')}
-                        type='password'
-                        placeholder='敏感信息不会发送到前端显示'
-                      />
-                    </Col>
-                    <Col xs={24} sm={24} md={8} lg={8} xl={8}>
-                      <Form.Checkbox
-                        field='SMTPSSLEnabled'
-                        noLabel
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      <div>
+                        <Text size='small'>{t('SMTP 服务器地址')}</Text>
+                        <Input
+                          value={smtpForm.server}
+                          placeholder='smtp.qq.com'
+                          onChange={(v) => setSmtpForm({ ...smtpForm, server: v })}
+                        />
+                      </div>
+                      <div>
+                        <Text size='small'>{t('SMTP 端口')}</Text>
+                        <InputNumber
+                          value={smtpForm.port}
+                          min={1}
+                          max={65535}
+                          style={{ width: '100%' }}
+                          onChange={(v) => setSmtpForm({ ...smtpForm, port: v })}
+                        />
+                      </div>
+                      <div>
+                        <Text size='small'>{t('SMTP 账户')}</Text>
+                        <Input
+                          value={smtpForm.account}
+                          placeholder='your@qq.com'
+                          onChange={(v) => setSmtpForm({ ...smtpForm, account: v })}
+                        />
+                      </div>
+                      <div>
+                        <Text size='small'>{t('SMTP 发送者邮箱')}</Text>
+                        <Input
+                          value={smtpForm.from}
+                          placeholder={t('留空则与账户相同')}
+                          onChange={(v) => setSmtpForm({ ...smtpForm, from: v })}
+                        />
+                      </div>
+                      <div>
+                        <Text size='small'>{t('SMTP 访问凭证')}</Text>
+                        <Input
+                          value={smtpForm.token}
+                          type='password'
+                          placeholder={t('授权码')}
+                          onChange={(v) => setSmtpForm({ ...smtpForm, token: v })}
+                        />
+                      </div>
+                      <Checkbox
+                        checked={smtpForm.ssl_enabled}
                         onChange={(e) =>
-                          handleCheckboxChange('SMTPSSLEnabled', e)
+                          setSmtpForm({ ...smtpForm, ssl_enabled: e.target.checked })
                         }
                       >
                         {t('启用SMTP SSL')}
-                      </Form.Checkbox>
-                    </Col>
-                  </Row>
-                  <Button onClick={submitSMTP}>{t('保存 SMTP 设置')}</Button>
+                      </Checkbox>
+                    </div>
+                  </Modal>
                 </Form.Section>
               </Card>
               <Card>
