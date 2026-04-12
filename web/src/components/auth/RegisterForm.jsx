@@ -612,6 +612,7 @@ const RegisterForm = () => {
                       type='email'
                       onChange={(value) => handleChange('email', value)}
                       prefix={<IconMail />}
+                      extraText={t('目前仅支持 Gmail 和 QQ 邮箱注册')}
                       suffix={
                         <Button
                           onClick={sendVerificationCode}

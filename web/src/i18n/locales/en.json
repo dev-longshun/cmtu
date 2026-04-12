@@ -3301,6 +3301,7 @@
     "输入要添加的邮箱域名": "Enter the email domain to add",
     "输入认证器应用显示的6位数字验证码": "Enter the 6-digit verification code displayed on the authenticator application",
     "输入邮箱地址": "Enter Email Address",
+    "目前仅支持 Gmail 和 QQ 邮箱注册": "Only Gmail and QQ email registration is supported",
     "输入金额": "Enter amount",
     "输入项目名称，按回车添加": "Enter the item name, press Enter to add",
     "输入额度": "Enter quota",
