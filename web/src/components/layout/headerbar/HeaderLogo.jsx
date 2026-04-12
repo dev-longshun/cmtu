@@ -58,6 +58,7 @@ const HeaderLogo = ({
             <Typography.Title
               heading={4}
               className='!text-lg !font-semibold !mb-0'
+              style={{ color: '#5C2434' }}
             >
               {systemName}
             </Typography.Title>
