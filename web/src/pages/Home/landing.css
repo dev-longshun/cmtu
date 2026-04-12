@@ -14,12 +14,6 @@
   justify-content: center;
 }
 
-body[theme-mode="dark"] .ld-root,
-.dark .ld-root {
-  --ld-bg: #2A1520;
-  --ld-accent: #F06B7E;
-  --ld-tagline: rgba(255, 255, 255, 0.7);
-}
 
 .ld-hero {
   display: flex;
