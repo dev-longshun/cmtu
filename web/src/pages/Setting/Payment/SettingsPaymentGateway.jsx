@@ -27,11 +27,13 @@ import {
   showSuccess,
   verifyJSON,
 } from '../../../helpers';
+import { getCurrencyConfig } from '../../../helpers/render';
 import { useTranslation } from 'react-i18next';
 
 export default function SettingsPaymentGateway(props) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const { symbol, rate } = getCurrencyConfig();
   const [inputs, setInputs] = useState({
     PayAddress: '',
     EpayId: '',
@@ -260,16 +262,37 @@ export default function SettingsPaymentGateway(props) {
             <Col xs={24} sm={24} md={8} lg={8} xl={8}>
               <Form.InputNumber
                 field='Price'
-                precision={2}
+                precision={4}
                 label={t('充值价格（x元/美金）')}
-                placeholder={t('例如：7，就是7元/美金')}
+                placeholder={`${t('例如：7，就是7元/美金')}`}
+                extraText={rate > 1 ? `${symbol}1 = ${(1 / rate).toFixed(4)} ${t('美元')}` : ''}
+                formatter={(value) =>
+                  value && rate > 1
+                    ? String((Number(value) / rate).toFixed(4))
+                    : value ? String(value) : ''
+                }
+                parser={(value) =>
+                  value && rate > 1
+                    ? String((Number(value) * rate).toFixed(4))
+                    : value ? String(value) : ''
+                }
               />
             </Col>
             <Col xs={24} sm={24} md={8} lg={8} xl={8}>
               <Form.InputNumber
                 field='MinTopUp'
                 label={t('最低充值美元数量')}
-                placeholder={t('例如：2，就是最低充值2$')}
+                placeholder={`${t('例如：2，就是最低充值2$')}`}
+                formatter={(value) =>
+                  value && rate > 1
+                    ? String(Math.round(Number(value) * rate))
+                    : value ? String(value) : ''
+                }
+                parser={(value) =>
+                  value && rate > 1
+                    ? String(Math.round(Number(value) / rate))
+                    : value ? String(value) : ''
+                }
               />
             </Col>
           </Row>
