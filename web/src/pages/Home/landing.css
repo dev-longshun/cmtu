@@ -3,10 +3,11 @@
    ============================================ */
 
 .ld-root {
-  --ld-bg: #FFF0ED;
+  --ld-bg: #FFE4E1;
   --ld-accent: #E8576A;
+  --ld-tagline: #FFFFFF;
 
-  background: var(--ld-bg);
+  background: var(--ld-bg) !important;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -15,27 +16,28 @@
 
 body[theme-mode="dark"] .ld-root,
 .dark .ld-root {
-  --ld-bg: #1A1215;
+  --ld-bg: #2A1520;
   --ld-accent: #F06B7E;
+  --ld-tagline: rgba(255, 255, 255, 0.7);
 }
 
 .ld-hero {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   padding: 40px 24px;
 }
 
 .ld-hero-logo {
-  width: 120px;
-  height: 120px;
+  width: 128px;
+  height: 128px;
   object-fit: contain;
-  border-radius: 24px;
+  border-radius: 28px;
 }
 
 .ld-hero-title {
-  font-size: 36px;
+  font-size: 40px;
   font-weight: 700;
   color: var(--ld-accent);
   margin: 0;
@@ -44,12 +46,8 @@ body[theme-mode="dark"] .ld-root,
 
 .ld-hero-tagline {
   font-size: 16px;
-  color: #8A6E73;
+  color: var(--ld-tagline);
   margin: 0;
   letter-spacing: 0.05em;
-}
-
-body[theme-mode="dark"] .ld-hero-tagline,
-.dark .ld-hero-tagline {
-  color: #C4A8AD;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
