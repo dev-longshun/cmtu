@@ -5,8 +5,8 @@ COPY web/package.json .
 COPY web/bun.lock .
 RUN --mount=type=cache,target=/root/.bun/install/cache \
     bun install
-COPY ./web .
 COPY ./VERSION .
+COPY ./web .
 RUN DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION=$(cat VERSION) bun run build
 
 FROM golang:alpine AS builder2
