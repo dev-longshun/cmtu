@@ -27,10 +27,16 @@ import {
   showSuccess,
   showWarning,
 } from '../../../helpers';
+import {
+  quotaToDisplayAmount,
+  displayAmountToQuota,
+} from '../../../helpers/quota';
+import { getCurrencyConfig } from '../../../helpers/render';
 
 export default function SettingsCreditLimit(props) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const { symbol } = getCurrencyConfig();
   const [inputs, setInputs] = useState({
     QuotaForNewUser: '',
     PreConsumedQuota: '',
@@ -103,8 +109,18 @@ export default function SettingsCreditLimit(props) {
                   field={'QuotaForNewUser'}
                   step={1}
                   min={0}
-                  suffix={'Token'}
+                  suffix={symbol}
                   placeholder={''}
+                  formatter={(value) =>
+                    value
+                      ? String(
+                          Math.round(quotaToDisplayAmount(Number(value))),
+                        )
+                      : ''
+                  }
+                  parser={(value) =>
+                    value ? String(displayAmountToQuota(Number(value))) : ''
+                  }
                   onChange={(value) =>
                     setInputs({
                       ...inputs,
@@ -136,9 +152,19 @@ export default function SettingsCreditLimit(props) {
                   field={'QuotaForInviter'}
                   step={1}
                   min={0}
-                  suffix={'Token'}
+                  suffix={symbol}
                   extraText={''}
                   placeholder={t('例如：2000')}
+                  formatter={(value) =>
+                    value
+                      ? String(
+                          Math.round(quotaToDisplayAmount(Number(value))),
+                        )
+                      : ''
+                  }
+                  parser={(value) =>
+                    value ? String(displayAmountToQuota(Number(value))) : ''
+                  }
                   onChange={(value) =>
                     setInputs({
                       ...inputs,
@@ -155,9 +181,19 @@ export default function SettingsCreditLimit(props) {
                   field={'QuotaForInvitee'}
                   step={1}
                   min={0}
-                  suffix={'Token'}
+                  suffix={symbol}
                   extraText={''}
                   placeholder={t('例如：1000')}
+                  formatter={(value) =>
+                    value
+                      ? String(
+                          Math.round(quotaToDisplayAmount(Number(value))),
+                        )
+                      : ''
+                  }
+                  parser={(value) =>
+                    value ? String(displayAmountToQuota(Number(value))) : ''
+                  }
                   onChange={(value) =>
                     setInputs({
                       ...inputs,
