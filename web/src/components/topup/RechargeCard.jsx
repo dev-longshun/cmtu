@@ -34,6 +34,7 @@ import {
   Tooltip,
   Tabs,
   TabPane,
+  InputNumber,
 } from '@douyinfe/semi-ui';
 import { SiAlipay, SiWechat, SiStripe } from 'react-icons/si';
 import {
@@ -248,39 +249,40 @@ const RechargeCard = ({
               {(enableOnlineTopUp || enableStripeTopUp) && (
                 <Row gutter={12}>
                   <Col xs={24} sm={24} md={24} lg={10} xl={10}>
-                    <Form.InputNumber
-                      field='topUpCount'
-                      label={t('充值数量')}
-                      disabled={!enableOnlineTopUp && !enableStripeTopUp}
-                      placeholder={
-                        t('充值数量，最低 ') + renderQuotaWithAmount(minTopUp)
-                      }
-                      value={topUpCount}
-                      min={minTopUp}
-                      max={999999999}
-                      step={1}
-                      precision={0}
-                      formatter={(value) =>
-                        value ? String(usdToDisplay(Number(value))) : ''
-                      }
-                      parser={(value) =>
-                        value ? String(displayToUsd(Number(value))) : ''
-                      }
-                      onChange={async (value) => {
-                        if (value && value >= 1) {
-                          setTopUpCount(value);
-                          setSelectedPreset(null);
-                          await getAmount(value);
+                    <div style={{ marginBottom: 12 }}>
+                      <Text size='small' style={{ display: 'block', marginBottom: 4, fontWeight: 600 }}>
+                        {t('充值数量')}
+                      </Text>
+                      <InputNumber
+                        disabled={!enableOnlineTopUp && !enableStripeTopUp}
+                        placeholder={
+                          t('充值数量，最低 ') + renderQuotaWithAmount(minTopUp)
                         }
-                      }}
-                      onBlur={(e) => {
-                        const displayVal = parseInt(e.target.value);
-                        const usdVal = displayToUsd(displayVal);
-                        if (!usdVal || usdVal < 1) {
-                          setTopUpCount(minTopUp);
-                          getAmount(minTopUp);
-                        }
-                      }}
+                        value={usdToDisplay(topUpCount)}
+                        min={usdToDisplay(minTopUp)}
+                        max={999999999}
+                        step={usdToDisplay(1) || 1}
+                        precision={0}
+                        suffix={getCurrencyConfig().symbol}
+                        style={{ width: '100%' }}
+                        onChange={async (displayValue) => {
+                          if (displayValue && displayValue >= 1) {
+                            const usdValue = displayToUsd(displayValue);
+                            setTopUpCount(usdValue);
+                            setSelectedPreset(null);
+                            await getAmount(usdValue);
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const displayVal = parseInt(e.target.value);
+                          if (!displayVal || displayVal < usdToDisplay(minTopUp)) {
+                            setTopUpCount(minTopUp);
+                            getAmount(minTopUp);
+                          }
+                        }}
+                      />
+                    </div>
+                  </Col>
                       formatter={(value) => (value ? `${value}` : '')}
                       parser={(value) =>
                         value ? parseInt(value.replace(/[^\d]/g, '')) : 0
@@ -462,10 +464,6 @@ const RechargeCard = ({
                           bodyStyle={{ padding: '12px' }}
                           onClick={() => {
                             selectPresetAmount(preset);
-                            onlineFormApiRef.current?.setValue(
-                              'topUpCount',
-                              preset.value,
-                            );
                           }}
                         >
                           <div style={{ textAlign: 'center' }}>
