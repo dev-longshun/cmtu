@@ -371,6 +371,9 @@ const OtherSetting = () => {
                 onChange={handleInputChange}
                 style={{ fontFamily: 'JetBrains Mono, Consolas' }}
                 autosize={{ minRows: 6, maxRows: 12 }}
+                helpText={t(
+                  '支持 HTML 结构化公告。可用 CSS 类：nt-notice（容器）、nt-section（分区）、nt-section-title（标题）、nt-highlight（高亮提示）、nt-api-url（API 地址栏）、nt-copy-btn + data-copy="文本"（复制按钮）、nt-group-item（群号条目）、nt-status-frame（状态监控 iframe）、nt-footer（页脚条款）。使用 {{API_URL}} 占位符会自动替换为当前站点 API 地址。',
+                )}
               />
               <Button onClick={submitNotice} loading={loadingInput['Notice']}>
                 {t('设置公告')}

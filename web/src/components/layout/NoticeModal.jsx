@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useEffect, useState, useContext, useMemo } from 'react';
+import React, { useEffect, useState, useContext, useMemo, useRef } from 'react';
 import {
   Button,
   Modal,
@@ -27,7 +27,8 @@ import {
   Timeline,
 } from '@douyinfe/semi-ui';
 import { useTranslation } from 'react-i18next';
-import { API, showError, getRelativeTime } from '../../helpers';
+import { API, showError, getRelativeTime, copy } from '../../helpers';
+import { getServerAddress } from '../../helpers/token';
 import { marked } from 'marked';
 import {
   IllustrationNoContent,
@@ -49,6 +50,7 @@ const NoticeModal = ({
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   const [statusState] = useContext(StatusContext);
+  const noticeRef = useRef(null);
 
   const announcements = statusState?.status?.announcements || [];
 
@@ -89,7 +91,10 @@ const NoticeModal = ({
       const { success, message, data } = res.data;
       if (success) {
         if (data !== '') {
-          const htmlNotice = marked.parse(data);
+          const apiUrl = getServerAddress() + '/v1';
+          const htmlNotice = marked
+            .parse(data)
+            .replaceAll('{{API_URL}}', apiUrl);
           setNoticeContent(htmlNotice);
         } else {
           setNoticeContent('');
@@ -115,6 +120,29 @@ const NoticeModal = ({
       setActiveTab(defaultTab);
     }
   }, [defaultTab, visible]);
+
+  // Attach click handlers to [data-copy] buttons inside notice content
+  useEffect(() => {
+    if (!noticeRef.current || !noticeContent) return;
+    const container = noticeRef.current;
+    const handler = async (e) => {
+      const btn = e.target.closest('[data-copy]');
+      if (!btn || !container.contains(btn)) return;
+      const text = btn.getAttribute('data-copy');
+      const ok = await copy(text);
+      if (ok) {
+        const original = btn.textContent;
+        btn.textContent = '已复制 ✓';
+        btn.classList.add('nt-copied');
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove('nt-copied');
+        }, 1500);
+      }
+    };
+    container.addEventListener('click', handler);
+    return () => container.removeEventListener('click', handler);
+  }, [noticeContent]);
 
   const renderMarkdownNotice = () => {
     if (loading) {
@@ -143,8 +171,9 @@ const NoticeModal = ({
 
     return (
       <div
+        ref={noticeRef}
         dangerouslySetInnerHTML={{ __html: noticeContent }}
-        className='notice-content-scroll max-h-[55vh] overflow-y-auto pr-2'
+        className='notice-content-scroll max-h-[70vh] overflow-y-auto pr-2'
       />
     );
   };
