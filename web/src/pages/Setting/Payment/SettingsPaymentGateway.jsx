@@ -261,15 +261,17 @@ export default function SettingsPaymentGateway(props) {
               <Form.InputNumber
                 field='Price'
                 precision={4}
-                label={t('充值价格（x元/美金）')}
-                placeholder={t('例如：7，就是7元/美金')}
+                label={t('充值价格（元/内部单位）')}
+                placeholder={t('例如：7.3，即 7.3 元兑换 1 内部单位')}
+                extraText={t('内部单位通过"通用设置"中的汇率换算为显示货币，如 1 内部单位 = 100🍓 则填 1 表示 1 元 = 100🍓')}
               />
             </Col>
             <Col xs={24} sm={24} md={8} lg={8} xl={8}>
               <Form.InputNumber
                 field='MinTopUp'
-                label={t('最低充值美元数量')}
-                placeholder={t('例如：2，就是最低充值2$')}
+                label={t('最低充值数量')}
+                placeholder={t('例如：100')}
+                extraText={t('自定义货币模式下为显示货币单位，如填 100 表示最低充值 100🍓')}
               />
             </Col>
           </Row>
@@ -295,11 +297,11 @@ export default function SettingsPaymentGateway(props) {
                 field='AmountOptions'
                 label={t('自定义充值数量选项')}
                 placeholder={t(
-                  '为一个 JSON 数组，例如：[10, 20, 50, 100, 200, 500]',
+                  '为一个 JSON 数组，例如：[1000, 3000, 5000]',
                 )}
                 autosize
                 extraText={t(
-                  '设置用户可选择的充值数量选项，例如：[10, 20, 50, 100, 200, 500]',
+                  '自定义货币模式下填显示货币单位，如 [1000, 3000, 5000] 表示 1000🍓、3000🍓、5000🍓',
                 )}
               />
             </Col>
