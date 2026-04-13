@@ -173,7 +173,6 @@ const TopUp = () => {
       }
 
       if (topUpCount < minTopUp) {
-        console.log('[TOPUP DEBUG] preTopUp validation FAILED:', { topUpCount, minTopUp, 'topUpCount < minTopUp': topUpCount < minTopUp, topUpCountType: typeof topUpCount, minTopUpType: typeof minTopUp });
         showError(t('充值数量不能小于') + minTopUp);
         return;
       }
@@ -199,7 +198,6 @@ const TopUp = () => {
     }
 
     if (topUpCount < minTopUp) {
-      console.log('[TOPUP DEBUG] onlineTopUp validation FAILED:', { topUpCount, minTopUp, topUpCountType: typeof topUpCount, minTopUpType: typeof minTopUp });
       showError(t('充值数量不能小于') + minTopUp);
       return;
     }
@@ -448,19 +446,12 @@ const TopUp = () => {
           const enableStripeTopUp = data.enable_stripe_topup || false;
           const enableOnlineTopUp = data.enable_online_topup || false;
           const enableCreemTopUp = data.enable_creem_topup || false;
-          const minTopUpValue = enableOnlineTopUp
-            ? data.min_topup
-            : enableStripeTopUp
-              ? data.stripe_min_topup
-              : 1;
-          console.log('[TOPUP DEBUG] API response:', { min_topup: data.min_topup, stripe_min_topup: data.stripe_min_topup, amount_options: data.amount_options, enableOnlineTopUp, enableStripeTopUp });
-          console.log('[TOPUP DEBUG] minTopUpValue:', minTopUpValue, 'type:', typeof minTopUpValue);
+          const minTopUpValue = data.min_topup || 1;
           setEnableOnlineTopUp(enableOnlineTopUp);
           setEnableStripeTopUp(enableStripeTopUp);
           setEnableCreemTopUp(enableCreemTopUp);
           setMinTopUp(minTopUpValue);
           setTopUpCount(minTopUpValue);
-          console.log('[TOPUP DEBUG] setState done, minTopUp:', minTopUpValue, 'topUpCount:', minTopUpValue);
 
           // 设置 Creem 产品
           try {
@@ -477,8 +468,10 @@ const TopUp = () => {
             setPresetAmounts(generatePresetAmounts(minTopUpValue));
           }
 
-          // 初始化显示实付金额
-          getAmount(minTopUpValue);
+          // 初始化显示实付金额（仅在线充值开启时）
+          if (enableOnlineTopUp || enableStripeTopUp) {
+            getAmount(minTopUpValue);
+          }
         } catch (e) {
           console.log('解析支付方式失败:', e);
           setPayMethods([]);
@@ -577,7 +570,6 @@ const TopUp = () => {
     if (value === undefined) {
       value = topUpCount;
     }
-    console.log('[TOPUP DEBUG] getAmount called with:', value, 'type:', typeof value);
     setAmountLoading(true);
     try {
       const res = await API.post('/api/user/amount', {
