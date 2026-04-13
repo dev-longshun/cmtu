@@ -92,9 +92,10 @@ const NoticeModal = ({
       if (success) {
         if (data !== '') {
           const apiUrl = getServerAddress() + '/v1';
-          const htmlNotice = marked
-            .parse(data)
-            .replaceAll('{{API_URL}}', apiUrl);
+          const fmt = res.data.format || 'markdown';
+          const htmlNotice = fmt === 'html'
+            ? data.replaceAll('{{API_URL}}', apiUrl)
+            : marked.parse(data).replaceAll('{{API_URL}}', apiUrl);
           setNoticeContent(htmlNotice);
         } else {
           setNoticeContent('');

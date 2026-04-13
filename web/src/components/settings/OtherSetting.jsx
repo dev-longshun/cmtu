@@ -27,6 +27,8 @@ import {
   Modal,
   Space,
   Card,
+  RadioGroup,
+  Radio,
 } from '@douyinfe/semi-ui';
 import { API, showError, showSuccess, timestamp2string } from '../../helpers';
 import { marked } from 'marked';
@@ -41,6 +43,7 @@ const OtherSetting = () => {
   const { t } = useTranslation();
   let [inputs, setInputs] = useState({
     Notice: '',
+    NoticeFormat: 'markdown',
     [LEGAL_USER_AGREEMENT_KEY]: '',
     [LEGAL_PRIVACY_POLICY_KEY]: '',
     SystemName: '',
@@ -95,6 +98,7 @@ const OtherSetting = () => {
     try {
       setLoadingInput((loadingInput) => ({ ...loadingInput, Notice: true }));
       await updateOption('Notice', inputs.Notice);
+      await updateOption('NoticeFormat', inputs.NoticeFormat || 'markdown');
       showSuccess(t('公告已更新'));
     } catch (error) {
       console.error(t('公告更新失败'), error);
@@ -362,6 +366,18 @@ const OtherSetting = () => {
         >
           <Card>
             <Form.Section text={t('通用设置')}>
+              <div style={{ marginBottom: 12 }}>
+                <span style={{ fontSize: 14, fontWeight: 500, marginRight: 12 }}>{t('公告格式')}</span>
+                <RadioGroup
+                  value={inputs.NoticeFormat || 'markdown'}
+                  onChange={(e) => setInputs((prev) => ({ ...prev, NoticeFormat: e.target.value }))}
+                  type='button'
+                  size='small'
+                >
+                  <Radio value='markdown'>Markdown</Radio>
+                  <Radio value='html'>HTML</Radio>
+                </RadioGroup>
+              </div>
               <Form.TextArea
                 label={t('公告')}
                 placeholder={t(
