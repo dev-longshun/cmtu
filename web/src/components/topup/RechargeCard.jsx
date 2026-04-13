@@ -413,13 +413,12 @@ const RechargeCard = ({
                       let priceSymbol = symbol;
                       let basePriceUSD;
                       if (type === 'CUSTOM') {
-                        // 🍓 → USD → CNY
                         basePriceUSD = preset.value / rate;
                       } else {
                         basePriceUSD = preset.value;
                       }
 
-                      const originalPriceCNY = basePriceUSD * usdRate;
+                      // priceRatio = 后端 Price，即实际支付汇率（元/内部单位）
                       const hasDiscount = discount < 1.0;
                       let displayActualPay, displaySave;
 
@@ -429,13 +428,14 @@ const RechargeCard = ({
                         priceSymbol = '$';
                       } else if (type === 'CNY') {
                         displayValue = preset.value * usdRate;
-                        displayActualPay = originalPriceCNY * discount;
-                        displaySave = originalPriceCNY - displayActualPay;
+                        const fullPrice = basePriceUSD * priceRatio;
+                        displayActualPay = fullPrice * discount;
+                        displaySave = fullPrice - displayActualPay;
                         priceSymbol = '¥';
                       } else if (type === 'CUSTOM') {
-                        // displayValue 已经是🍓，不需要转换
-                        displayActualPay = originalPriceCNY * discount;
-                        displaySave = originalPriceCNY - displayActualPay;
+                        const fullPrice = basePriceUSD * priceRatio;
+                        displayActualPay = fullPrice * discount;
+                        displaySave = fullPrice - displayActualPay;
                         priceSymbol = '¥';
                       }
 
