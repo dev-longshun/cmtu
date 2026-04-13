@@ -20,7 +20,30 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
+	"math"
 )
+
+// convertToDisplayUnit 将 USD 内部单位转换为显示单位（如🍓）
+func convertToDisplayUnit(usdAmount int) int {
+	if operation_setting.GetQuotaDisplayType() == operation_setting.QuotaDisplayTypeCustom {
+		rate := operation_setting.GetGeneralSetting().CustomCurrencyExchangeRate
+		if rate > 0 {
+			return int(math.Round(float64(usdAmount) * rate))
+		}
+	}
+	return usdAmount
+}
+
+// convertFromDisplayUnit 将显示单位（如🍓）转换回 USD 内部单位
+func convertFromDisplayUnit(displayAmount int64) int64 {
+	if operation_setting.GetQuotaDisplayType() == operation_setting.QuotaDisplayTypeCustom {
+		rate := operation_setting.GetGeneralSetting().CustomCurrencyExchangeRate
+		if rate > 0 {
+			return int64(math.Round(float64(displayAmount) / rate))
+		}
+	}
+	return displayAmount
+}
 
 func GetTopUpInfo(c *gin.Context) {
 	// 获取支付方式
@@ -48,16 +71,29 @@ func GetTopUpInfo(c *gin.Context) {
 		}
 	}
 
+	// 转换预设金额和最低充值为显示单位（如🍓）
+	amountOptions := operation_setting.GetPaymentSetting().AmountOptions
+	displayOptions := make([]int, len(amountOptions))
+	for i, opt := range amountOptions {
+		displayOptions[i] = convertToDisplayUnit(opt)
+	}
+	// 转换折扣 key 为显示单位
+	rawDiscount := operation_setting.GetPaymentSetting().AmountDiscount
+	displayDiscount := make(map[int]float64)
+	for k, v := range rawDiscount {
+		displayDiscount[convertToDisplayUnit(k)] = v
+	}
+
 	data := gin.H{
 		"enable_online_topup": operation_setting.PayAddress != "" && operation_setting.EpayId != "" && operation_setting.EpayKey != "",
 		"enable_stripe_topup": setting.StripeApiSecret != "" && setting.StripeWebhookSecret != "" && setting.StripePriceId != "",
 		"enable_creem_topup":  setting.CreemApiKey != "" && setting.CreemProducts != "[]",
 		"creem_products":      setting.CreemProducts,
 		"pay_methods":         payMethods,
-		"min_topup":           operation_setting.MinTopUp,
-		"stripe_min_topup":    setting.StripeMinTopUp,
-		"amount_options":      operation_setting.GetPaymentSetting().AmountOptions,
-		"discount":            operation_setting.GetPaymentSetting().AmountDiscount,
+		"min_topup":           convertToDisplayUnit(operation_setting.MinTopUp),
+		"stripe_min_topup":    convertToDisplayUnit(setting.StripeMinTopUp),
+		"amount_options":      displayOptions,
+		"discount":            displayDiscount,
 	}
 	common.ApiSuccess(c, data)
 }
@@ -132,8 +168,11 @@ func RequestEpay(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "error", "data": "参数错误"})
 		return
 	}
-	if req.Amount < getMinTopup() {
-		c.JSON(200, gin.H{"message": "error", "data": fmt.Sprintf("充值数量不能小于 %d", getMinTopup())})
+	// req.Amount 是显示单位（如🍓），MinTopUp 也是 USD 内部单位
+	// 统一用显示单位比较
+	displayMin := int64(convertToDisplayUnit(operation_setting.MinTopUp))
+	if req.Amount < displayMin {
+		c.JSON(200, gin.H{"message": "error", "data": fmt.Sprintf("充值数量不能小于 %d", displayMin)})
 		return
 	}
 
@@ -143,7 +182,9 @@ func RequestEpay(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "error", "data": "获取用户分组失败"})
 		return
 	}
-	payMoney := getPayMoney(req.Amount, group)
+	// 转换为 USD 内部单位计算付款金额
+	usdAmount := convertFromDisplayUnit(req.Amount)
+	payMoney := getPayMoney(usdAmount, group)
 	if payMoney < 0.01 {
 		c.JSON(200, gin.H{"message": "error", "data": "充值金额过低"})
 		return
@@ -177,7 +218,7 @@ func RequestEpay(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "error", "data": "拉起支付失败"})
 		return
 	}
-	amount := req.Amount
+	amount := usdAmount
 	if operation_setting.GetQuotaDisplayType() == operation_setting.QuotaDisplayTypeTokens {
 		dAmount := decimal.NewFromInt(int64(amount))
 		dQuotaPerUnit := decimal.NewFromFloat(common.QuotaPerUnit)

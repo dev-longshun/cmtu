@@ -55,16 +55,6 @@ import SubscriptionPlansCard from './SubscriptionPlansCard';
 
 const { Text } = Typography;
 
-// USD ↔ 显示货币转换（用于充值输入框）
-const usdToDisplay = (usd) => {
-  const { rate } = getCurrencyConfig();
-  return Math.round(usd * (rate || 1));
-};
-const displayToUsd = (display) => {
-  const { rate } = getCurrencyConfig();
-  return Math.round(display / (rate || 1));
-};
-
 const RechargeCard = ({
   t,
   enableOnlineTopUp,
@@ -256,26 +246,25 @@ const RechargeCard = ({
                       <InputNumber
                         disabled={!enableOnlineTopUp && !enableStripeTopUp}
                         placeholder={
-                          t('充值数量，最低 ') + renderQuotaWithAmount(minTopUp)
+                          t('充值数量，最低 ') + minTopUp
                         }
-                        value={usdToDisplay(topUpCount)}
-                        min={usdToDisplay(minTopUp)}
+                        value={topUpCount}
+                        min={minTopUp}
                         max={999999999}
-                        step={usdToDisplay(1) || 1}
+                        step={1}
                         precision={0}
                         suffix={getCurrencyConfig().symbol}
                         style={{ width: '100%' }}
-                        onChange={async (displayValue) => {
-                          if (displayValue && displayValue >= 1) {
-                            const usdValue = displayToUsd(displayValue);
-                            setTopUpCount(usdValue);
+                        onChange={async (value) => {
+                          if (value && value >= 1) {
+                            setTopUpCount(value);
                             setSelectedPreset(null);
-                            await getAmount(usdValue);
+                            await getAmount(value);
                           }
                         }}
                         onBlur={(e) => {
-                          const displayVal = parseInt(e.target.value);
-                          if (!displayVal || displayVal < usdToDisplay(minTopUp)) {
+                          const val = parseInt(e.target.value);
+                          if (!val || val < minTopUp) {
                             setTopUpCount(minTopUp);
                             getAmount(minTopUp);
                           }

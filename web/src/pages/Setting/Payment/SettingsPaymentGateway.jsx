@@ -27,13 +27,11 @@ import {
   showSuccess,
   verifyJSON,
 } from '../../../helpers';
-import { getCurrencyConfig } from '../../../helpers/render';
 import { useTranslation } from 'react-i18next';
 
 export default function SettingsPaymentGateway(props) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-  const { symbol, rate } = getCurrencyConfig();
   const [inputs, setInputs] = useState({
     PayAddress: '',
     EpayId: '',
@@ -51,21 +49,18 @@ export default function SettingsPaymentGateway(props) {
 
   useEffect(() => {
     if (props.options && formApiRef.current) {
-      const priceUsd =
-        props.options.Price !== undefined
-          ? parseFloat(props.options.Price)
-          : 7.3;
-      const minTopUpUsd =
-        props.options.MinTopUp !== undefined
-          ? parseFloat(props.options.MinTopUp)
-          : 1;
-      // 加载时转换为🍓单位显示：价格 元/USD → 元/🍓，最低充值 USD → 🍓
       const currentInputs = {
         PayAddress: props.options.PayAddress || '',
         EpayId: props.options.EpayId || '',
         EpayKey: props.options.EpayKey || '',
-        Price: rate > 1 ? parseFloat((priceUsd / rate).toFixed(4)) : priceUsd,
-        MinTopUp: rate > 1 ? Math.round(minTopUpUsd * rate) : minTopUpUsd,
+        Price:
+          props.options.Price !== undefined
+            ? parseFloat(props.options.Price)
+            : 7.3,
+        MinTopUp:
+          props.options.MinTopUp !== undefined
+            ? parseFloat(props.options.MinTopUp)
+            : 1,
         TopupGroupRatio: props.options.TopupGroupRatio || '',
         CustomCallbackAddress: props.options.CustomCallbackAddress || '',
         PayMethods: props.options.PayMethods || '',
@@ -156,14 +151,10 @@ export default function SettingsPaymentGateway(props) {
         options.push({ key: 'EpayKey', value: inputs.EpayKey });
       }
       if (inputs.Price !== '') {
-        // 保存时转换回 USD 单位：元/🍓 → 元/USD
-        const priceUsd = rate > 1 ? (parseFloat(inputs.Price) * rate).toFixed(4) : inputs.Price.toString();
-        options.push({ key: 'Price', value: priceUsd });
+        options.push({ key: 'Price', value: inputs.Price.toString() });
       }
       if (inputs.MinTopUp !== '') {
-        // 保存时转换回 USD 单位：🍓 → USD
-        const minTopUpUsd = rate > 1 ? Math.round(parseFloat(inputs.MinTopUp) / rate).toString() : inputs.MinTopUp.toString();
-        options.push({ key: 'MinTopUp', value: minTopUpUsd });
+        options.push({ key: 'MinTopUp', value: inputs.MinTopUp.toString() });
       }
       if (inputs.CustomCallbackAddress !== '') {
         options.push({
@@ -271,16 +262,14 @@ export default function SettingsPaymentGateway(props) {
                 field='Price'
                 precision={4}
                 label={t('充值价格（x元/美金）')}
-                placeholder={rate > 1 ? `${t('例如')}：0.01` : `${t('例如：7，就是7元/美金')}`}
-                suffix={rate > 1 ? `${t('元')}/${symbol}` : ''}
+                placeholder={t('例如：7，就是7元/美金')}
               />
             </Col>
             <Col xs={24} sm={24} md={8} lg={8} xl={8}>
               <Form.InputNumber
                 field='MinTopUp'
                 label={t('最低充值美元数量')}
-                placeholder={rate > 1 ? `${t('例如')}：1000` : `${t('例如：2，就是最低充值2$')}`}
-                suffix={rate > 1 ? symbol : ''}
+                placeholder={t('例如：2，就是最低充值2$')}
               />
             </Col>
           </Row>
