@@ -612,7 +612,18 @@ const RegisterForm = () => {
                       type='email'
                       onChange={(value) => handleChange('email', value)}
                       prefix={<IconMail />}
-                      extraText={t('目前仅支持 Gmail 和 QQ 邮箱注册')}
+                      extraText={(() => {
+                        if (!status.email_domain_restriction_enabled) return null;
+                        const whitelist = status.email_domain_whitelist;
+                        if (!Array.isArray(whitelist) || whitelist.length === 0) return null;
+                        const domainNames = {
+                          'qq.com': 'QQ', 'gmail.com': 'Gmail', 'outlook.com': 'Outlook',
+                          'hotmail.com': 'Hotmail', '163.com': '163', '126.com': '126',
+                          'icloud.com': 'iCloud', 'yahoo.com': 'Yahoo', 'foxmail.com': 'Foxmail',
+                        };
+                        const names = whitelist.map(d => domainNames[d] || d);
+                        return t('目前仅支持') + ' ' + names.join('、') + ' ' + t('邮箱注册');
+                      })()}
                       suffix={
                         <Button
                           onClick={sendVerificationCode}
