@@ -39,6 +39,7 @@ const ActionButtons = ({
   isSelfUseMode,
   contactQRCode,
   contactLabel,
+  contactGroups,
   logout,
   navigate,
   t,
@@ -50,6 +51,7 @@ const ActionButtons = ({
       <ContactButton
         contactQRCode={contactQRCode}
         contactLabel={contactLabel}
+        contactGroups={contactGroups}
         isMobile={isMobile}
         t={t}
       />

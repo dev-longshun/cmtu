@@ -10,6 +10,13 @@ const (
 	QuotaDisplayTypeCustom = "CUSTOM"
 )
 
+// ContactGroup 单个联系群配置
+type ContactGroup struct {
+	GroupNumber string `json:"group_number"` // 群号
+	QRCode      string `json:"qrcode"`       // 二维码图片 URL
+	Note        string `json:"note"`         // 备注（群名称、已满/未满等）
+}
+
 type GeneralSetting struct {
 	DocsLink            string `json:"docs_link"`
 	PingIntervalEnabled bool   `json:"ping_interval_enabled"`
@@ -20,10 +27,12 @@ type GeneralSetting struct {
 	CustomCurrencySymbol string `json:"custom_currency_symbol"`
 	// 自定义货币与美元汇率（1 USD = X Custom）
 	CustomCurrencyExchangeRate float64 `json:"custom_currency_exchange_rate"`
-	// 联系二维码图片 URL（为空则不显示按钮）
+	// 联系二维码图片 URL（保留旧字段，兼容）
 	ContactQRCode string `json:"contact_qrcode"`
 	// 联系按钮/弹窗标题文案
 	ContactLabel string `json:"contact_label"`
+	// 多群配置
+	ContactGroups []ContactGroup `json:"contact_groups"`
 }
 
 // 默认配置

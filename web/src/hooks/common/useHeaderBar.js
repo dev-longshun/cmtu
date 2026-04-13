@@ -53,6 +53,7 @@ export const useHeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
   const isDemoSiteMode = statusState?.status?.demo_site_enabled || false;
   const contactQRCode = statusState?.status?.contact_qrcode || '';
   const contactLabel = statusState?.status?.contact_label || '';
+  const contactGroups = statusState?.status?.contact_groups || [];
 
   // 获取顶栏模块配置
   const headerNavModulesConfig = statusState?.status?.HeaderNavModules;
@@ -239,6 +240,7 @@ export const useHeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
     isDemoSiteMode,
     contactQRCode,
     contactLabel,
+    contactGroups,
     isConsoleRoute,
     isHomePage,
     theme,

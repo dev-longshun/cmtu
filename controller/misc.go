@@ -72,6 +72,7 @@ func GetStatus(c *gin.Context) {
 		"docs_link":                   operation_setting.GetGeneralSetting().DocsLink,
 		"contact_qrcode":              operation_setting.GetGeneralSetting().ContactQRCode,
 		"contact_label":               operation_setting.GetGeneralSetting().ContactLabel,
+			"contact_groups":              operation_setting.GetGeneralSetting().ContactGroups,
 		"quota_per_unit":              common.QuotaPerUnit,
 		// 兼容旧前端：保留 display_in_currency，同时提供新的 quota_display_type
 		"display_in_currency":           operation_setting.IsCurrencyDisplay(),

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Popover } from '@douyinfe/semi-ui';
+import { Popover, Toast } from '@douyinfe/semi-ui';
+import { IconCopy } from '@douyinfe/semi-icons';
 
 const QQIcon = ({ size = 18 }) => (
   <svg
@@ -13,28 +14,84 @@ const QQIcon = ({ size = 18 }) => (
   </svg>
 );
 
-const ContactButton = ({ contactQRCode, contactLabel, t, isMobile }) => {
-  const label = contactLabel || t('加入 QQ 群');
+const copyToClipboard = (text, t) => {
+  navigator.clipboard.writeText(text).then(() => {
+    Toast.success(t('复制成功'));
+  });
+};
 
-  const content = contactQRCode ? (
-    <div className='flex flex-col items-center gap-3 p-3'>
+const GroupItem = ({ group, t }) => (
+  <div className='flex flex-col items-center gap-2 py-3'>
+    <div className='flex items-center gap-2'>
       <span className='text-sm font-medium text-semi-color-text-0'>
-        {label}
+        {group.group_number}
       </span>
+      <button
+        onClick={() => copyToClipboard(group.group_number, t)}
+        className='inline-flex items-center justify-center w-6 h-6 rounded cursor-pointer border-none bg-transparent text-semi-color-text-2 hover:text-semi-color-primary hover:bg-semi-color-fill-0 transition-colors'
+        aria-label={t('复制群号')}
+      >
+        <IconCopy size='small' />
+      </button>
+    </div>
+    {group.note && (
+      <span className='text-xs text-semi-color-text-2'>{group.note}</span>
+    )}
+    {group.qrcode && (
       <img
-        src={contactQRCode}
-        alt={label}
-        className='w-48 h-48 rounded-lg object-contain'
+        src={group.qrcode}
+        alt={group.note || group.group_number}
+        className='w-40 h-40 rounded-lg object-contain'
       />
-    </div>
-  ) : (
-    <div className='flex flex-col items-center gap-2 p-4'>
-      <QQIcon size={32} />
-      <span className='text-sm text-semi-color-text-2'>
-        {t('暂未配置 QQ 群二维码')}
-      </span>
-    </div>
-  );
+    )}
+  </div>
+);
+
+const ContactButton = ({ contactQRCode, contactLabel, contactGroups, t, isMobile }) => {
+  const label = contactLabel || t('加入 QQ 群');
+  const groups = Array.isArray(contactGroups) ? contactGroups : [];
+  const hasGroups = groups.length > 0;
+
+  let content;
+  if (hasGroups) {
+    content = (
+      <div className='flex flex-col items-center p-2' style={{ maxHeight: 400, overflowY: 'auto' }}>
+        <span className='text-sm font-medium text-semi-color-text-0 pb-2'>
+          {label}
+        </span>
+        {groups.map((group, idx) => (
+          <React.Fragment key={idx}>
+            {idx > 0 && (
+              <div className='w-full border-t border-semi-color-border my-1' />
+            )}
+            <GroupItem group={group} t={t} />
+          </React.Fragment>
+        ))}
+      </div>
+    );
+  } else if (contactQRCode) {
+    content = (
+      <div className='flex flex-col items-center gap-3 p-3'>
+        <span className='text-sm font-medium text-semi-color-text-0'>
+          {label}
+        </span>
+        <img
+          src={contactQRCode}
+          alt={label}
+          className='w-48 h-48 rounded-lg object-contain'
+        />
+      </div>
+    );
+  } else {
+    content = (
+      <div className='flex flex-col items-center gap-2 p-4'>
+        <QQIcon size={32} />
+        <span className='text-sm text-semi-color-text-2'>
+          {t('暂未配置联系群')}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <Popover content={content} trigger='click' position='bottomRight'>

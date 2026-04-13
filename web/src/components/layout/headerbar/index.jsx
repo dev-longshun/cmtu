@@ -44,6 +44,7 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
     isDemoSiteMode,
     contactQRCode,
     contactLabel,
+    contactGroups,
     isConsoleRoute,
     isHomePage,
     theme,
@@ -125,6 +126,7 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
             isSelfUseMode={isSelfUseMode}
             contactQRCode={contactQRCode}
             contactLabel={contactLabel}
+            contactGroups={contactGroups}
             logout={logout}
             navigate={navigate}
             t={t}

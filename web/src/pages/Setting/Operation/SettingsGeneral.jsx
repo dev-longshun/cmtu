@@ -30,7 +30,13 @@ import {
   InputGroup,
   Input,
   Upload,
+  Toast,
 } from '@douyinfe/semi-ui';
+import {
+  IconPlus,
+  IconDelete,
+  IconCopy,
+} from '@douyinfe/semi-icons';
 import {
   compareObjects,
   API,
@@ -50,6 +56,7 @@ export default function GeneralSettings(props) {
     'general_setting.docs_link': '',
     'general_setting.contact_qrcode': '',
     'general_setting.contact_label': '',
+    'general_setting.contact_groups': '',
     'general_setting.quota_display_type': 'CUSTOM',
     'general_setting.custom_currency_symbol': '🍓',
     'general_setting.custom_currency_exchange_rate': '',
@@ -66,12 +73,36 @@ export default function GeneralSettings(props) {
   const [inputs, setInputs] = useState(defaultInputs);
   const refForm = useRef();
   const [inputsRow, setInputsRow] = useState(defaultInputs);
+  const [contactGroups, setContactGroups] = useState([]);
 
   function handleFieldChange(fieldName) {
     return (value) => {
       setInputs((inputs) => ({ ...inputs, [fieldName]: value }));
     };
   }
+
+  // 联系群管理
+  const addContactGroup = () => {
+    setContactGroups((prev) => [...prev, { group_number: '', qrcode: '', note: '' }]);
+  };
+
+  const removeContactGroup = (index) => {
+    setContactGroups((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateContactGroup = (index, field, value) => {
+    setContactGroups((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
+  };
+
+  // 同步 contactGroups 到 inputs
+  useEffect(() => {
+    const json = JSON.stringify(contactGroups);
+    setInputs((prev) => ({ ...prev, 'general_setting.contact_groups': json }));
+  }, [contactGroups]);
 
   function onSubmit() {
     const updateArray = compareObjects(inputs, inputsRow);
@@ -164,6 +195,14 @@ export default function GeneralSettings(props) {
     setInputs(currentInputs);
     setInputsRow(structuredClone(currentInputs));
     refForm.current.setValues(currentInputs);
+    // 解析联系群配置
+    try {
+      const groups = currentInputs['general_setting.contact_groups'];
+      const parsed = groups ? JSON.parse(groups) : [];
+      setContactGroups(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setContactGroups([]);
+    }
   }, [props.options]);
 
   return (
@@ -197,39 +236,6 @@ export default function GeneralSettings(props) {
                 />
               </Col>
               <Col xs={24} sm={12} md={8} lg={8} xl={8}>
-                <Form.Slot label={t('联系二维码图片')}>
-                  <Upload
-                    action='/api/upload'
-                    name='file'
-                    accept='image/jpeg,image/png,image/gif,image/webp'
-                    maxSize={5120}
-                    limit={1}
-                    draggable={true}
-                    dragMainText={t('点击或拖拽上传二维码图片')}
-                    dragSubText={t('支持 JPG、PNG、GIF、WebP，最大 5MB')}
-                    onSuccess={(responseBody) => {
-                      if (responseBody?.response?.success) {
-                        handleFieldChange('general_setting.contact_qrcode')(responseBody.response.data);
-                        showSuccess(t('上传成功'));
-                      }
-                    }}
-                    onError={() => showError(t('上传失败'))}
-                  />
-                  {inputs['general_setting.contact_qrcode'] && (
-                    <div className='mt-2 flex flex-col items-center gap-1'>
-                      <img
-                        src={inputs['general_setting.contact_qrcode']}
-                        alt='QR Code'
-                        className='w-32 h-32 rounded-lg object-contain border'
-                      />
-                      <span className='text-xs text-semi-color-text-2 break-all'>
-                        {inputs['general_setting.contact_qrcode']}
-                      </span>
-                    </div>
-                  )}
-                </Form.Slot>
-              </Col>
-              <Col xs={24} sm={12} md={8} lg={8} xl={8}>
                 <Form.Input
                   field={'general_setting.contact_label'}
                   label={t('联系按钮文案')}
@@ -238,6 +244,52 @@ export default function GeneralSettings(props) {
                   onChange={handleFieldChange('general_setting.contact_label')}
                   showClear
                 />
+              </Col>
+              <Col span={24}>
+                <Form.Slot label={t('联系群配置')}>
+                  <div className='flex flex-col gap-3'>
+                    {contactGroups.map((group, idx) => (
+                      <div
+                        key={idx}
+                        className='flex flex-wrap items-start gap-2 p-3 rounded-lg'
+                        style={{ border: '1px solid var(--semi-color-border)', background: 'var(--semi-color-fill-0)' }}
+                      >
+                        <Input
+                          placeholder={t('群号')}
+                          value={group.group_number}
+                          onChange={(v) => updateContactGroup(idx, 'group_number', v)}
+                          style={{ width: 160 }}
+                        />
+                        <Input
+                          placeholder={t('备注（如：1群-未满）')}
+                          value={group.note}
+                          onChange={(v) => updateContactGroup(idx, 'note', v)}
+                          style={{ width: 200 }}
+                        />
+                        <Input
+                          placeholder={t('二维码图片 URL（可选）')}
+                          value={group.qrcode}
+                          onChange={(v) => updateContactGroup(idx, 'qrcode', v)}
+                          style={{ flex: 1, minWidth: 200 }}
+                        />
+                        <Button
+                          icon={<IconDelete />}
+                          type='danger'
+                          theme='borderless'
+                          onClick={() => removeContactGroup(idx)}
+                        />
+                      </div>
+                    ))}
+                    <Button
+                      icon={<IconPlus />}
+                      theme='light'
+                      onClick={addContactGroup}
+                      style={{ alignSelf: 'flex-start' }}
+                    >
+                      {t('添加群')}
+                    </Button>
+                  </div>
+                </Form.Slot>
               </Col>
               {/* 单位美元额度已合入汇率组合控件（TOKENS 模式下编辑），不再单独展示 */}
               <Col xs={24} sm={12} md={8} lg={8} xl={8}>
