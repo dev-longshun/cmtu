@@ -28,6 +28,7 @@ import {
   copy,
   getQuotaPerUnit,
 } from '../../helpers';
+import { getCurrencyConfig } from '../../helpers/render';
 import { Modal, Toast } from '@douyinfe/semi-ui';
 import { useTranslation } from 'react-i18next';
 import { UserContext } from '../../context/User';
@@ -645,9 +646,14 @@ const TopUp = () => {
     setTopUpCount(preset.value);
     setSelectedPreset(preset.value);
 
-    // 计算实际支付金额，考虑折扣
+    // 计算实际支付金额（CNY），考虑折扣
     const discount = preset.discount || topupInfo.discount[preset.value] || 1.0;
-    const discountedAmount = preset.value * priceRatio * discount;
+    const { rate, type } = getCurrencyConfig();
+    // CUSTOM 模式下 preset.value 是🍓单位，需先转 USD
+    const usdValue = type === 'CUSTOM' && rate > 0
+      ? preset.value / rate
+      : preset.value;
+    const discountedAmount = usdValue * priceRatio * discount;
     setAmount(discountedAmount);
   };
 
