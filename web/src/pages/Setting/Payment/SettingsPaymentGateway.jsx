@@ -263,7 +263,7 @@ export default function SettingsPaymentGateway(props) {
                 precision={4}
                 label={t('充值价格（元/内部单位）')}
                 placeholder={t('例如：7.3，即 7.3 元兑换 1 内部单位')}
-                extraText={t('内部单位通过"通用设置"中的汇率换算为显示货币，如 1 内部单位 = 100🍓 则填 1 表示 1 元 = 100🍓')}
+                extraText={t('内部单位通过通用设置中的汇率换算为显示货币，如 1 内部单位 = 100🍓 则填 1 表示 1 元 = 100🍓')}
               />
             </Col>
             <Col xs={24} sm={24} md={8} lg={8} xl={8}>

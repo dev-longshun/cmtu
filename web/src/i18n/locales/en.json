@@ -801,7 +801,7 @@
     "充值价格（x元/美金）": "Top-up price (yuan per internal unit)",
     "充值价格（元/内部单位）": "Top-up price (yuan per internal unit)",
     "例如：7.3，即 7.3 元兑换 1 内部单位": "e.g.: 7.3, means 7.3 yuan per 1 internal unit",
-    "内部单位通过"通用设置"中的汇率换算为显示货币，如 1 内部单位 = 100🍓 则填 1 表示 1 元 = 100🍓": "Internal unit is converted to display currency via exchange rate in General Settings. e.g. if 1 unit = 100🍓, set 1 to mean 1 yuan = 100🍓",
+    "内部单位通过通用设置中的汇率换算为显示货币，如 1 内部单位 = 100🍓 则填 1 表示 1 元 = 100🍓": "Internal unit is converted to display currency via exchange rate in General Settings. e.g. if 1 unit = 100 strawberries, set 1 to mean 1 yuan = 100 strawberries",
     "充值价格显示": "Top Up price",
     "充值分组倍率": "Top Up group ratio",
     "充值分组倍率不是合法的 JSON 字符串": "Top Up group ratio is not a valid JSON string",
