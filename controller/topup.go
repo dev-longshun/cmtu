@@ -71,29 +71,18 @@ func GetTopUpInfo(c *gin.Context) {
 		}
 	}
 
-	// 转换预设金额和最低充值为显示单位（如🍓）
-	amountOptions := operation_setting.GetPaymentSetting().AmountOptions
-	displayOptions := make([]int, len(amountOptions))
-	for i, opt := range amountOptions {
-		displayOptions[i] = convertToDisplayUnit(opt)
-	}
-	// 转换折扣 key 为显示单位
-	rawDiscount := operation_setting.GetPaymentSetting().AmountDiscount
-	displayDiscount := make(map[int]float64)
-	for k, v := range rawDiscount {
-		displayDiscount[convertToDisplayUnit(k)] = v
-	}
-
+	// MinTopUp、AmountOptions、AmountDiscount 管理员直接填🍓单位，数据库存🍓
+	// 不需要转换，直接返回
 	data := gin.H{
 		"enable_online_topup": operation_setting.PayAddress != "" && operation_setting.EpayId != "" && operation_setting.EpayKey != "",
 		"enable_stripe_topup": setting.StripeApiSecret != "" && setting.StripeWebhookSecret != "" && setting.StripePriceId != "",
 		"enable_creem_topup":  setting.CreemApiKey != "" && setting.CreemProducts != "[]",
 		"creem_products":      setting.CreemProducts,
 		"pay_methods":         payMethods,
-		"min_topup":           convertToDisplayUnit(operation_setting.MinTopUp),
-		"stripe_min_topup":    convertToDisplayUnit(setting.StripeMinTopUp),
-		"amount_options":      displayOptions,
-		"discount":            displayDiscount,
+		"min_topup":           operation_setting.MinTopUp,
+		"stripe_min_topup":    setting.StripeMinTopUp,
+		"amount_options":      operation_setting.GetPaymentSetting().AmountOptions,
+		"discount":            operation_setting.GetPaymentSetting().AmountDiscount,
 	}
 	common.ApiSuccess(c, data)
 }
@@ -121,7 +110,7 @@ func GetEpayClient() *epay.Client {
 	return withUrl
 }
 
-func getPayMoney(amount int64, group string) float64 {
+func getPayMoney(amount int64, group string, displayAmount int64) float64 {
 	dAmount := decimal.NewFromInt(amount)
 	// 充值金额以“展示类型”为准：
 	// - USD/CNY: 前端传 amount 为金额单位；TOKENS: 前端传 tokens，需要换成 USD 金额
@@ -137,9 +126,9 @@ func getPayMoney(amount int64, group string) float64 {
 
 	dTopupGroupRatio := decimal.NewFromFloat(topupGroupRatio)
 	dPrice := decimal.NewFromFloat(operation_setting.Price)
-	// apply optional preset discount by the original request amount (if configured), default 1.0
+	// 折扣 key 是🍓单位（管理员填的），用 displayAmount 查找
 	discount := 1.0
-	if ds, ok := operation_setting.GetPaymentSetting().AmountDiscount[int(amount)]; ok {
+	if ds, ok := operation_setting.GetPaymentSetting().AmountDiscount[int(displayAmount)]; ok {
 		if ds > 0 {
 			discount = ds
 		}
@@ -168,11 +157,9 @@ func RequestEpay(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "error", "data": "参数错误"})
 		return
 	}
-	// req.Amount 是显示单位（如🍓），MinTopUp 也是 USD 内部单位
-	// 统一用显示单位比较
-	displayMin := int64(convertToDisplayUnit(operation_setting.MinTopUp))
-	if req.Amount < displayMin {
-		c.JSON(200, gin.H{"message": "error", "data": fmt.Sprintf("充值数量不能小于 %d", displayMin)})
+	// req.Amount 和 MinTopUp 都是🍓单位，直接比较
+	if req.Amount < int64(operation_setting.MinTopUp) {
+		c.JSON(200, gin.H{"message": "error", "data": fmt.Sprintf("充值数量不能小于 %d", operation_setting.MinTopUp)})
 		return
 	}
 
@@ -184,7 +171,7 @@ func RequestEpay(c *gin.Context) {
 	}
 	// 转换为 USD 内部单位计算付款金额
 	usdAmount := convertFromDisplayUnit(req.Amount)
-	payMoney := getPayMoney(usdAmount, group)
+	payMoney := getPayMoney(usdAmount, group, req.Amount)
 	if payMoney < 0.01 {
 		c.JSON(200, gin.H{"message": "error", "data": "充值金额过低"})
 		return
@@ -361,8 +348,8 @@ func RequestAmount(c *gin.Context) {
 		return
 	}
 
-	if req.Amount < getMinTopup() {
-		c.JSON(200, gin.H{"message": "error", "data": fmt.Sprintf("充值数量不能小于 %d", getMinTopup())})
+	if req.Amount < int64(operation_setting.MinTopUp) {
+		c.JSON(200, gin.H{"message": "error", "data": fmt.Sprintf("充值数量不能小于 %d", operation_setting.MinTopUp)})
 		return
 	}
 	id := c.GetInt("id")
@@ -371,7 +358,8 @@ func RequestAmount(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "error", "data": "获取用户分组失败"})
 		return
 	}
-	payMoney := getPayMoney(req.Amount, group)
+	usdAmount := convertFromDisplayUnit(req.Amount)
+	payMoney := getPayMoney(usdAmount, group, req.Amount)
 	if payMoney <= 0.01 {
 		c.JSON(200, gin.H{"message": "error", "data": "充值金额过低"})
 		return
