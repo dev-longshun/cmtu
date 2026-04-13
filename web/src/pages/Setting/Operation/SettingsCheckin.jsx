@@ -28,6 +28,8 @@ import {
   showWarning,
   renderQuota,
 } from '../../../helpers';
+import { quotaToDisplayAmount, displayAmountToQuota } from '../../../helpers/quota';
+import { getCurrencyConfig } from '../../../helpers/render';
 import { useTranslation } from 'react-i18next';
 
 export default function SettingsCheckin(props) {
@@ -41,6 +43,9 @@ export default function SettingsCheckin(props) {
   const refForm = useRef();
   const [inputsRow, setInputsRow] = useState(inputs);
   const [streakBonuses, setStreakBonuses] = useState([]);
+  // 管理员输入的🍓数量（显示单位）
+  const [dailyDisplay, setDailyDisplay] = useState(0);
+  const { symbol } = getCurrencyConfig();
 
   function handleFieldChange(fieldName) {
     return (value) => {
@@ -48,8 +53,15 @@ export default function SettingsCheckin(props) {
     };
   }
 
+  // 每日奖励：管理员输入🍓，自动转 quota 存储
+  const handleDailyDisplayChange = (value) => {
+    setDailyDisplay(value || 0);
+    const quota = displayAmountToQuota(value || 0);
+    setInputs((prev) => ({ ...prev, 'checkin_setting.daily_quota': quota }));
+  };
+
   const addStreakBonus = () => {
-    setStreakBonuses((prev) => [...prev, { days: '', quota: '' }]);
+    setStreakBonuses((prev) => [...prev, { days: '', displayQuota: '' }]);
   };
 
   const removeStreakBonus = (index) => {
@@ -59,14 +71,17 @@ export default function SettingsCheckin(props) {
   const updateStreakBonus = (index, field, value) => {
     setStreakBonuses((prev) => {
       const next = [...prev];
-      next[index] = { ...next[index], [field]: parseInt(value) || 0 };
+      next[index] = { ...next[index], [field]: field === 'days' ? (parseInt(value) || 0) : (parseFloat(value) || 0) };
       return next;
     });
   };
 
-  // 同步 streakBonuses 到 inputs
+  // 同步 streakBonuses 到 inputs（显示单位→quota）
   useEffect(() => {
-    const json = JSON.stringify(streakBonuses.filter(b => b.days > 0 && b.quota > 0));
+    const converted = streakBonuses
+      .filter(b => b.days > 0 && b.displayQuota > 0)
+      .map(b => ({ days: b.days, quota: displayAmountToQuota(b.displayQuota) }));
+    const json = JSON.stringify(converted);
     setInputs((prev) => ({ ...prev, 'checkin_setting.streak_bonuses': json }));
   }, [streakBonuses]);
 
@@ -103,11 +118,14 @@ export default function SettingsCheckin(props) {
     setInputs(currentInputs);
     setInputsRow(structuredClone(currentInputs));
     refForm.current.setValues(currentInputs);
-    // 解析里程碑配置
+    // 回填每日奖励的显示值
+    setDailyDisplay(quotaToDisplayAmount(currentInputs['checkin_setting.daily_quota'] || 0));
+    // 解析里程碑配置，quota→显示单位
     try {
       const bonuses = currentInputs['checkin_setting.streak_bonuses'];
       const parsed = bonuses ? JSON.parse(bonuses) : [];
-      setStreakBonuses(Array.isArray(parsed) ? parsed : []);
+      const arr = Array.isArray(parsed) ? parsed : [];
+      setStreakBonuses(arr.map(b => ({ days: b.days, displayQuota: quotaToDisplayAmount(b.quota || 0) })));
     } catch {
       setStreakBonuses([]);
     }
@@ -133,14 +151,16 @@ export default function SettingsCheckin(props) {
               />
             </Col>
             <Col xs={24} sm={12} md={8}>
-              <Form.InputNumber
-                field={'checkin_setting.daily_quota'}
-                label={t('每日签到奖励')}
-                extraText={t('quota 内部单位，当前约等于') + ' ' + renderQuota(inputs['checkin_setting.daily_quota'] || 0)}
-                onChange={handleFieldChange('checkin_setting.daily_quota')}
-                min={0}
-                disabled={!inputs['checkin_setting.enabled']}
-              />
+              <Form.Slot label={t('每日签到奖励')}>
+                <Input
+                  type='number'
+                  value={dailyDisplay || ''}
+                  onChange={handleDailyDisplayChange}
+                  suffix={symbol}
+                  placeholder={t('例如 100')}
+                  disabled={!inputs['checkin_setting.enabled']}
+                />
+              </Form.Slot>
             </Col>
           </Row>
           <Row gutter={16}>
@@ -166,12 +186,12 @@ export default function SettingsCheckin(props) {
                       />
                       <span className='text-sm whitespace-nowrap'>{t('天，当天总奖励')}</span>
                       <Input
-                        placeholder='quota'
-                        value={bonus.quota || ''}
-                        onChange={(v) => updateStreakBonus(idx, 'quota', v)}
+                        placeholder={t('例如 500')}
+                        value={bonus.displayQuota || ''}
+                        onChange={(v) => updateStreakBonus(idx, 'displayQuota', v)}
                         style={{ width: 120 }}
                         type='number'
-                        suffix={bonus.quota > 0 ? renderQuota(bonus.quota) : ''}
+                        suffix={symbol}
                       />
                       <Button
                         icon={<IconDelete />}
