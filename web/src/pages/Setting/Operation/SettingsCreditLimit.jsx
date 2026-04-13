@@ -36,7 +36,7 @@ import { getCurrencyConfig } from '../../../helpers/render';
 export default function SettingsCreditLimit(props) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-  const { symbol } = getCurrencyConfig();
+  const { symbol, type: currencyType } = getCurrencyConfig();
   const [inputs, setInputs] = useState({
     QuotaForNewUser: '',
     PreConsumedQuota: '',
@@ -111,6 +111,11 @@ export default function SettingsCreditLimit(props) {
                   min={0}
                   suffix={symbol}
                   placeholder={''}
+                  extraText={
+                    currencyType !== 'TOKENS' && inputs.QuotaForNewUser
+                      ? `= ${Number(inputs.QuotaForNewUser).toLocaleString()} Token`
+                      : ''
+                  }
                   formatter={(value) =>
                     value
                       ? String(
@@ -153,7 +158,11 @@ export default function SettingsCreditLimit(props) {
                   step={1}
                   min={0}
                   suffix={symbol}
-                  extraText={''}
+                  extraText={
+                    currencyType !== 'TOKENS' && inputs.QuotaForInviter
+                      ? `= ${Number(inputs.QuotaForInviter).toLocaleString()} Token`
+                      : ''
+                  }
                   placeholder={t('例如：2000')}
                   formatter={(value) =>
                     value
@@ -182,7 +191,11 @@ export default function SettingsCreditLimit(props) {
                   step={1}
                   min={0}
                   suffix={symbol}
-                  extraText={''}
+                  extraText={
+                    currencyType !== 'TOKENS' && inputs.QuotaForInvitee
+                      ? `= ${Number(inputs.QuotaForInvitee).toLocaleString()} Token`
+                      : ''
+                  }
                   placeholder={t('例如：1000')}
                   formatter={(value) =>
                     value
