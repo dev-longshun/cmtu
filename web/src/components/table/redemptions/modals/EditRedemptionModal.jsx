@@ -26,8 +26,9 @@ import {
   showSuccess,
   renderQuota,
   renderQuotaWithPrompt,
-  renderUnitWithQuota,
 } from '../../../../helpers';
+import { displayAmountToQuota, quotaToDisplayAmount } from '../../../../helpers/quota';
+import { getCurrencyConfig } from '../../../../helpers/render';
 import { useIsMobile } from '../../../../hooks/common/useIsMobile';
 import {
   Button,
@@ -63,7 +64,7 @@ const EditRedemptionModal = (props) => {
 
   const getInitValues = () => ({
     name: '',
-    quota: 100000,
+    quota: displayAmountToQuota(100),
     count: 1,
     expired_time: null,
   });
@@ -312,42 +313,38 @@ const EditRedemptionModal = (props) => {
                         showClear
                       />
                       <div className='flex flex-wrap gap-2 mt-1 items-center'>
-                        {[
-                          { value: 500000, label: '$1' },
-                          { value: 5000000, label: '$10' },
-                          { value: 25000000, label: '$50' },
-                          { value: 50000000, label: '$100' },
-                          { value: 250000000, label: '$500' },
-                          { value: 500000000, label: '$1000' },
-                        ].map((item) => (
-                          <Tag
-                            key={item.value}
-                            color={values.quota === item.value ? 'blue' : undefined}
-                            type={values.quota === item.value ? 'solid' : 'ghost'}
-                            size='large'
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => {
-                              setCustomDollar(null);
-                              formApiRef.current?.setValue('quota', item.value);
-                            }}
-                          >
-                            {item.label}
-                          </Tag>
-                        ))}
+                        {[100, 500, 1000, 3000, 5000, 10000].map((amount) => {
+                          const quotaVal = displayAmountToQuota(amount);
+                          const { symbol } = getCurrencyConfig();
+                          return (
+                            <Tag
+                              key={amount}
+                              color={values.quota === quotaVal ? 'blue' : undefined}
+                              type={values.quota === quotaVal ? 'solid' : 'ghost'}
+                              size='large'
+                              style={{ cursor: 'pointer' }}
+                              onClick={() => {
+                                setCustomDollar(null);
+                                formApiRef.current?.setValue('quota', quotaVal);
+                              }}
+                            >
+                              {amount} {symbol}
+                            </Tag>
+                          );
+                        })}
                         <InputNumber
-                          prefix='$'
+                          prefix={getCurrencyConfig().symbol}
                           size='small'
-                          min={0.01}
+                          min={1}
                           step={1}
-                          precision={2}
-                          placeholder={t('自定义金额')}
+                          precision={0}
+                          placeholder={t('自定义数量')}
                           value={customDollar}
                           style={{ width: 140 }}
                           onChange={(val) => {
                             setCustomDollar(val);
                             if (val && val > 0) {
-                              const tokenVal = renderUnitWithQuota(val);
-                              formApiRef.current?.setValue('quota', tokenVal);
+                              formApiRef.current?.setValue('quota', displayAmountToQuota(val));
                             }
                           }}
                         />
