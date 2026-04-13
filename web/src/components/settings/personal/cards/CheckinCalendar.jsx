@@ -46,11 +46,14 @@ const CheckinCalendar = ({ t, status, turnstileEnabled, turnstileSiteKey }) => {
   const [turnstileWidgetKey, setTurnstileWidgetKey] = useState(0);
   const [checkinData, setCheckinData] = useState({
     enabled: false,
+    daily_quota: 0,
+    streak_bonuses: [],
     stats: {
       checked_in_today: false,
       total_checkins: 0,
       total_quota: 0,
       checkin_count: 0,
+      consecutive_days: 0,
       records: [],
     },
   });
@@ -132,8 +135,11 @@ const CheckinCalendar = ({ t, status, turnstileEnabled, turnstileSiteKey }) => {
       const res = await postCheckin(token);
       const { success, data, message } = res.data;
       if (success) {
+        const bonusMsg = data.bonus_awarded > 0
+          ? ` (${t('含里程碑奖励')} ${renderQuota(data.bonus_awarded)})`
+          : '';
         showSuccess(
-          t('签到成功！获得') + ' ' + renderQuota(data.quota_awarded),
+          t('签到成功！获得') + ' ' + renderQuota(data.quota_awarded) + bonusMsg,
         );
         // 刷新签到状态
         fetchCheckinStatus(currentMonth);
@@ -262,10 +268,10 @@ const CheckinCalendar = ({ t, status, turnstileEnabled, turnstileSiteKey }) => {
               {!initialLoaded
                 ? t('正在加载签到状态...')
                 : checkinData.stats?.checked_in_today
-                  ? t('今日已签到，累计签到') +
-                    ` ${checkinData.stats?.total_checkins || 0} ` +
+                  ? t('今日已签到，连续签到') +
+                    ` ${checkinData.stats?.consecutive_days || 0} ` +
                     t('天')
-                  : t('每日签到可获得随机额度奖励')}
+                  : t('每日签到可获得额度奖励')}
             </div>
           </div>
         </div>
@@ -289,7 +295,13 @@ const CheckinCalendar = ({ t, status, turnstileEnabled, turnstileSiteKey }) => {
       {/* 可折叠内容 */}
       <Collapsible isOpen={isCollapsed === false} keepDOM>
         {/* 签到统计 */}
-        <div className='grid grid-cols-3 gap-3 mb-4 mt-4'>
+        <div className='grid grid-cols-4 gap-3 mb-4 mt-4'>
+          <div className='text-center p-2.5 bg-slate-50 dark:bg-slate-800 rounded-lg'>
+            <div className='text-xl font-bold text-purple-600'>
+              {checkinData.stats?.consecutive_days || 0}
+            </div>
+            <div className='text-xs text-gray-500'>{t('连续签到')}</div>
+          </div>
           <div className='text-center p-2.5 bg-slate-50 dark:bg-slate-800 rounded-lg'>
             <div className='text-xl font-bold text-green-600'>
               {checkinData.stats?.total_checkins || 0}
@@ -309,6 +321,27 @@ const CheckinCalendar = ({ t, status, turnstileEnabled, turnstileSiteKey }) => {
             <div className='text-xs text-gray-500'>{t('累计获得')}</div>
           </div>
         </div>
+
+        {/* 里程碑进度 */}
+        {checkinData.streak_bonuses && checkinData.streak_bonuses.length > 0 && (
+          <div className='mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg'>
+            <div className='text-xs font-medium text-amber-700 dark:text-amber-400 mb-2'>{t('连续签到里程碑')}</div>
+            <div className='flex flex-wrap gap-2'>
+              {[...checkinData.streak_bonuses].sort((a, b) => a.days - b.days).map((bonus, idx) => {
+                const current = checkinData.stats?.consecutive_days || 0;
+                const achieved = current >= bonus.days;
+                const remaining = bonus.days - current;
+                return (
+                  <div key={idx} className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${achieved ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+                    {achieved ? <Check size={12} /> : null}
+                    <span>{t('第')} {bonus.days} {t('天')}: {renderQuota(bonus.quota)}</span>
+                    {!achieved && <span className='text-amber-600 dark:text-amber-400'>({t('还差')} {remaining} {t('天')})</span>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* 签到日历 - 使用更紧凑的样式 */}
         <Spin spinning={loading}>
@@ -370,8 +403,11 @@ const CheckinCalendar = ({ t, status, turnstileEnabled, turnstileSiteKey }) => {
         <div className='mt-3 p-2.5 bg-slate-50 dark:bg-slate-800 rounded-lg'>
           <Typography.Text type='tertiary' className='text-xs'>
             <ul className='list-disc list-inside space-y-0.5'>
-              <li>{t('每日签到可获得随机额度奖励')}</li>
-              <li>{t('签到奖励将直接添加到您的账户余额')}</li>
+              <li>{t('每日签到可获得')} {checkinData.daily_quota ? renderQuota(checkinData.daily_quota) : ''}</li>
+              {checkinData.streak_bonuses && [...checkinData.streak_bonuses].sort((a, b) => a.days - b.days).map((bonus, idx) => (
+                <li key={idx}>{t('连续签到')} {bonus.days} {t('天可获得')} {renderQuota(bonus.quota)}</li>
+              ))}
+              <li>{t('中断签到将重置连续天数')}</li>
               <li>{t('每日仅可签到一次，请勿重复签到')}</li>
             </ul>
           </Typography.Text>

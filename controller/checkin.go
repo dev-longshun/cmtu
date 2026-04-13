@@ -20,7 +20,6 @@ func GetCheckinStatus(c *gin.Context) {
 		return
 	}
 	userId := c.GetInt("id")
-	// 获取月份参数，默认为当前月份
 	month := c.DefaultQuery("month", time.Now().Format("2006-01"))
 
 	stats, err := model.GetUserCheckinStats(userId, month)
@@ -35,10 +34,12 @@ func GetCheckinStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"data": gin.H{
-			"enabled":   setting.Enabled,
-			"min_quota": setting.MinQuota,
-			"max_quota": setting.MaxQuota,
-			"stats":     stats,
+			"enabled":        setting.Enabled,
+			"daily_quota":    setting.DailyQuota,
+			"streak_bonuses": setting.StreakBonuses,
+			"min_quota":      setting.MinQuota,
+			"max_quota":      setting.MaxQuota,
+			"stats":          stats,
 		},
 	})
 }
@@ -66,7 +67,10 @@ func DoCheckin(c *gin.Context) {
 		"success": true,
 		"message": "签到成功",
 		"data": gin.H{
-			"quota_awarded": checkin.QuotaAwarded,
-			"checkin_date":  checkin.CheckinDate},
+			"quota_awarded":   checkin.QuotaAwarded,
+			"checkin_date":    checkin.CheckinDate,
+			"consecutive_days": checkin.ConsecutiveDays,
+			"bonus_awarded":   checkin.BonusAwarded,
+		},
 	})
 }
