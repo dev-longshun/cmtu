@@ -176,39 +176,75 @@ const CheckinCalendar = ({ t, status, turnstileEnabled, turnstileSiteKey }) => {
     return null;
   }
 
-  // 日期渲染函数 - 显示签到状态和获得的额度
+  // 构建里程碑天数集合，方便快速查找
+  const streakBonusMap = useMemo(() => {
+    const map = {};
+    (checkinData.streak_bonuses || []).forEach((b) => {
+      map[b.days] = b.quota;
+    });
+    return map;
+  }, [checkinData.streak_bonuses]);
+
+  // 日期渲染函数 - 显示签到状态和预计奖励
   const dateRender = (dateString) => {
-    // Semi Calendar 传入的 dateString 是 Date.toString() 格式
-    // 需要转换为 YYYY-MM-DD 格式来匹配后端数据
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      return null;
-    }
-    // 使用本地时间格式化，避免时区问题
+    if (isNaN(date.getTime())) return null;
+
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    const formattedDate = `${year}-${month}-${day}`; // YYYY-MM-DD
+    const formattedDate = `${year}-${month}-${day}`;
     const quotaAwarded = checkinRecordsMap[formattedDate];
     const isCheckedIn = quotaAwarded !== undefined;
 
+    // 已签到：绿色 ✓ + 积分
     if (isCheckedIn) {
       return (
-        <Tooltip
-          content={`${t('获得')} ${renderQuota(quotaAwarded)}`}
-          position='top'
-        >
+        <Tooltip content={`${t('获得')} ${renderQuota(quotaAwarded)}`} position='top'>
           <div className='absolute inset-0 flex flex-col items-center justify-center cursor-pointer'>
-            <div className='w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mb-0.5 shadow-sm'>
-              <Check size={14} className='text-white' strokeWidth={3} />
+            <div className='w-5 h-5 rounded-full bg-green-500 flex items-center justify-center mb-0.5 shadow-sm'>
+              <Check size={12} className='text-white' strokeWidth={3} />
             </div>
-            <div className='text-[10px] font-medium text-green-600 dark:text-green-400 leading-none'>
+            <div className='text-[9px] font-medium text-green-600 dark:text-green-400 leading-none'>
               {renderQuota(quotaAwarded)}
             </div>
           </div>
         </Tooltip>
       );
     }
+
+    // 未来日期（含今天未签）：灰色预览预计奖励
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+    if (date >= today && checkinData.daily_quota > 0) {
+      // 计算这一天如果连续签到是第几天
+      const currentStreak = checkinData.stats?.consecutive_days || 0;
+      const diffDays = Math.round((date - today) / 86400000);
+      // 今天未签到：今天是 currentStreak+1，明天是 currentStreak+2...
+      // 今天已签到：明天是 currentStreak+1...
+      const checkedToday = checkinData.stats?.checked_in_today;
+      const futureStreak = checkedToday
+        ? currentStreak + diffDays
+        : currentStreak + 1 + diffDays;
+
+      // 判断是否命中里程碑
+      const milestoneQuota = streakBonusMap[futureStreak];
+      const previewQuota = milestoneQuota || checkinData.daily_quota;
+      const isMilestone = !!milestoneQuota;
+
+      return (
+        <div className='absolute inset-0 flex flex-col items-center justify-center'>
+          <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 ${isMilestone ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-gray-100 dark:bg-gray-800'}`}>
+            <Gift size={10} className={isMilestone ? 'text-amber-500' : 'text-gray-400'} />
+          </div>
+          <div className={`text-[9px] leading-none ${isMilestone ? 'font-bold text-amber-600 dark:text-amber-400' : 'text-gray-400 dark:text-gray-600'}`}>
+            {renderQuota(previewQuota)}
+          </div>
+        </div>
+      );
+    }
+
     return null;
   };
 
