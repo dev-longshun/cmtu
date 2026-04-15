@@ -452,7 +452,8 @@ const TopUp = () => {
           // 这个逻辑现在由后端处理，如果 Stripe 启用，后端会在 pay_methods 中包含它
 
           // 如果配置了充值链接，追加"购买兑换码"支付方式
-          if (topUpLink) {
+          const currentTopUpLink = statusState?.status?.top_up_link || '';
+          if (currentTopUpLink) {
             payMethods = [
               ...payMethods,
               {
