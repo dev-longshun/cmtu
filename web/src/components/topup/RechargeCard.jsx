@@ -45,7 +45,6 @@ import {
   TrendingUp,
   Receipt,
   Sparkles,
-  ExternalLink,
   ShoppingCart,
 } from 'lucide-react';
 import { IconGift } from '@douyinfe/semi-icons';
@@ -83,8 +82,6 @@ const RechargeCard = ({
   setRedemptionCode,
   topUp,
   isSubmitting,
-  topUpLink,
-  openTopUpLink,
   userState,
   renderQuota,
   statusLoading,
@@ -536,76 +533,6 @@ const RechargeCard = ({
         )}
       </Card>
 
-      {/* 发卡网充值入口 */}
-      {topUpLink && (
-        <Card
-          className={`!rounded-xl w-full cursor-pointer transition-all hover:shadow-md ${
-            !hasOnlineTopUp
-              ? 'ring-2 ring-blue-100 border-blue-200'
-              : ''
-          }`}
-          style={
-            !hasOnlineTopUp
-              ? {
-                  background:
-                    'linear-gradient(135deg, rgba(59,130,246,0.05) 0%, rgba(99,102,241,0.05) 100%)',
-                }
-              : undefined
-          }
-          bodyStyle={{ padding: '16px' }}
-          onClick={openTopUpLink}
-        >
-          <div className='flex items-center justify-between gap-4'>
-            <div className='flex items-center gap-3 min-w-0'>
-              <Avatar
-                shape='square'
-                size='small'
-                className='shrink-0'
-                style={
-                  !hasOnlineTopUp
-                    ? {
-                        background:
-                          'linear-gradient(135deg, #3b82f6, #6366f1)',
-                        color: 'white',
-                      }
-                    : {
-                        background:
-                          'var(--semi-color-primary-light-default)',
-                        color: 'var(--semi-color-primary)',
-                      }
-                }
-              >
-                <ShoppingCart size={16} />
-              </Avatar>
-              <div className='min-w-0'>
-                <Typography.Text strong className='block truncate'>
-                  {t('购买兑换码')}
-                </Typography.Text>
-                <Typography.Text
-                  type='tertiary'
-                  size='small'
-                  className='block truncate'
-                >
-                  {t('前往发卡网站购买兑换码或直接充值')}
-                </Typography.Text>
-              </div>
-            </div>
-            <Button
-              theme={!hasOnlineTopUp ? 'solid' : 'light'}
-              type='primary'
-              className='!rounded-lg shrink-0'
-              icon={<ExternalLink size={14} />}
-              onClick={(e) => {
-                e.stopPropagation();
-                openTopUpLink();
-              }}
-            >
-              {t('前往充值')}
-            </Button>
-          </div>
-        </Card>
-      )}
-
       {/* 兑换码充值 */}
       <Card
         className='!rounded-xl w-full'
@@ -640,21 +567,7 @@ const RechargeCard = ({
             }
             showClear
             style={{ width: '100%' }}
-            extraText={
-              topUpLink && (
-                <Text type='tertiary'>
-                  {t('在找兑换码？')}
-                  <Text
-                    type='secondary'
-                    underline
-                    className='cursor-pointer'
-                    onClick={openTopUpLink}
-                  >
-                    {t('购买兑换码')}
-                  </Text>
-                </Text>
-              )
-            }
+            extraText={null}
           />
         </Form>
       </Card>
