@@ -567,7 +567,6 @@ const TopUp = () => {
 
   // 在 statusState 可用时获取充值信息
   useEffect(() => {
-    getTopupInfo().then();
     getSubscriptionPlans().then();
     getSubscriptionSelf().then();
   }, []);
@@ -581,6 +580,7 @@ const TopUp = () => {
       setPriceRatio(statusState.status.price || 1);
 
       setStatusLoading(false);
+      getTopupInfo().then();
     }
   }, [statusState?.status]);
 
