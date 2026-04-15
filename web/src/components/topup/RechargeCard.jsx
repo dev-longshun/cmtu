@@ -299,8 +299,9 @@ const RechargeCard = ({
                           {payMethods.map((payMethod) => {
                             const minTopupVal = Number(payMethod.min_topup) || 0;
                             const isStripe = payMethod.type === 'stripe';
+                            const isCardShop = payMethod.type === 'card_shop';
                             const disabled =
-                              (!enableOnlineTopUp && !isStripe) ||
+                              (!enableOnlineTopUp && !isStripe && !isCardShop) ||
                               (!enableStripeTopUp && isStripe) ||
                               minTopupVal > Number(topUpCount || 0);
 
@@ -321,6 +322,8 @@ const RechargeCard = ({
                                     <SiWechat size={18} color='#07C160' />
                                   ) : payMethod.type === 'stripe' ? (
                                     <SiStripe size={18} color='#635BFF' />
+                                  ) : payMethod.type === 'card_shop' ? (
+                                    <ShoppingCart size={18} color='#3b82f6' />
                                   ) : (
                                     <CreditCard
                                       size={18}

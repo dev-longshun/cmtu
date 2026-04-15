@@ -151,7 +151,9 @@ const TopUp = () => {
   };
 
   const preTopUp = async (payment) => {
-    if (payment === 'stripe') {
+    if (payment === 'card_shop') {
+      // 发卡网：不需要检查在线支付开关
+    } else if (payment === 'stripe') {
       if (!enableStripeTopUp) {
         showError(t('管理员未开启Stripe充值！'));
         return;
@@ -185,6 +187,13 @@ const TopUp = () => {
   };
 
   const onlineTopUp = async () => {
+    if (payWay === 'card_shop') {
+      // 发卡网：直接跳转到充值链接
+      setOpen(false);
+      openTopUpLink();
+      return;
+    }
+
     if (payWay === 'stripe') {
       // Stripe 支付处理
       if (amount === 0) {
@@ -441,6 +450,18 @@ const TopUp = () => {
 
           // 如果启用了 Stripe 支付，添加到支付方法列表
           // 这个逻辑现在由后端处理，如果 Stripe 启用，后端会在 pay_methods 中包含它
+
+          // 如果配置了充值链接，追加"购买兑换码"支付方式
+          if (topUpLink) {
+            payMethods = [
+              ...payMethods,
+              {
+                name: '购买兑换码',
+                type: 'card_shop',
+                color: 'rgba(var(--semi-blue-5), 1)',
+              },
+            ];
+          }
 
           setPayMethods(payMethods);
           const enableStripeTopUp = data.enable_stripe_topup || false;
