@@ -82,6 +82,7 @@ const RechargeCard = ({
   setRedemptionCode,
   topUp,
   isSubmitting,
+  topUpLink,
   userState,
   renderQuota,
   statusLoading,
@@ -116,7 +117,7 @@ const RechargeCard = ({
     }
   }, [shouldShowSubscription, activeTab]);
   const hasOnlineTopUp =
-    enableOnlineTopUp || enableStripeTopUp || enableCreemTopUp;
+    enableOnlineTopUp || enableStripeTopUp || enableCreemTopUp || !!topUpLink;
 
   const topupContent = (
     <Space vertical style={{ width: '100%' }}>
@@ -233,7 +234,7 @@ const RechargeCard = ({
             initValues={{ topUpCount: topUpCount }}
           >
             <div className='space-y-6'>
-              {(enableOnlineTopUp || enableStripeTopUp) && (
+              {(enableOnlineTopUp || enableStripeTopUp || !!topUpLink) && (
                 <Row gutter={12}>
                   <Col xs={24} sm={24} md={24} lg={10} xl={10}>
                     <div style={{ marginBottom: 12 }}>
@@ -366,7 +367,7 @@ const RechargeCard = ({
                 </Row>
               )}
 
-              {(enableOnlineTopUp || enableStripeTopUp) && (
+              {(enableOnlineTopUp || enableStripeTopUp || !!topUpLink) && (
                 <Form.Slot
                   label={
                     <div className='flex items-center gap-2'>
